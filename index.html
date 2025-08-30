@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higher or Lower Population Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .game-container {
+            background-color: #2e2a44;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 32rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .card {
+            background-color: #3b3058;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card img {
+            width: 100%;
+            max-width: 15rem;
+            height: auto;
+            border-radius: 0.5rem;
+            border: 2px solid #5d5d81;
+        }
+        .flag-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #c9c1f2;
+            text-align: center;
+        }
+        .population-text {
+            font-size: 1.125rem;
+            color: #a0a0c0;
+            text-align: center;
+        }
+        .vs-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #7d7d9e;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn {
+            background-color: #6a4c93;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #7b5da6;
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #c9c1f2;
+        }
+        .result-message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            text-align: center;
+            min-height: 2.5rem;
+        }
+        .correct {
+            color: #4ade80;
+        }
+        .incorrect {
+            color: #ef4444;
+        }
+        .game-over-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+        }
+        .game-over-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fca5a5;
+        }
+        .final-score {
+            font-size: 1.5rem;
+            color: #fca5a5;
+        }
+        .restart-btn {
+            background-color: #6a4c93;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .restart-btn:hover {
+            background-color: #7b5da6;
+        }
+        .hidden {
+            display: none;
+        }
+        .game-info-line {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 1rem;
+        }
+        #coins-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffde54;
+        }
+        #shop-btn {
+            background-color: #ffde54;
+            color: #1a1a2e;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+        }
+        #shop-btn:hover {
+            background-color: #f5c742;
+        }
+        .shop-modal {
+            background-color: #3b3058;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 28rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 90;
+        }
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .shop-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #4b3e6a;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .shop-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .item-cost {
+            font-size: 0.875rem;
+            color: #ffde54;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen">
+    <div id="game-container" class="game-container">
+        <h1 class="text-3xl font-bold text-center text-purple-300">Higher or Lower Population</h1>
+        <div class="game-info-line">
+            <span id="score-display">Score: 0</span>
+            <span id="streak-display">Streak: 0</span>
+            <span id="lives-display">Lives: 3</span>
+        </div>
+        <div class="game-info-line">
+            <button id="shop-btn">Shop</button>
+            <span id="coins-display"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>0</span>
+        </div>
+
+        <div id="cards-container" class="w-full flex flex-col items-center gap-4 md:flex-row md:justify-center">
+            <div id="card-one" class="card fade-in">
+                <p id="flag-name-one" class="flag-name">Country One</p>
+                <img id="flag-one" src="" alt="Country Flag">
+                <p id="population-one" class="population-text">Population: Calculating...</p>
+            </div>
+            
+            <p class="vs-text">VS</p>
+
+            <div id="card-two" class="card fade-in">
+                <p id="flag-name-two" class="flag-name">Country Two</p>
+                <img id="flag-two" src="" alt="Country Flag">
+                <p class="population-text">Higher or Lower?</p>
+            </div>
+        </div>
+
+        <div id="buttons-container" class="buttons-container">
+            <button id="higher-btn" class="btn">Higher</button>
+            <button id="lower-btn" class="btn">Lower</button>
+        </div>
+        
+        <p id="message" class="result-message"></p>
+
+        <div id="game-over-screen" class="game-over-container hidden">
+            <h2 class="game-over-title">Game Over!</h2>
+            <p id="final-score" class="final-score"></p>
+            <button id="restart-btn" class="restart-btn">Play Again</button>
+        </div>
+    </div>
+    
+    <!-- Shop Modal -->
+    <div id="shop-modal" class="hidden modal-overlay">
+        <div class="shop-modal">
+            <button id="close-shop-btn" class="modal-close-btn">&times;</button>
+            <h3 class="text-2xl font-bold text-center text-purple-300 mb-4">Shop</h3>
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-lg">Your Coins:</p>
+                <p id="modal-coins-display" class="text-lg font-bold text-yellow-300">0</p>
+            </div>
+            <div class="shop-items">
+                <button id="pass-btn" class="shop-item">
+                    <span>Pass</span>
+                    <span class="item-cost">20 coins</span>
+                </button>
+                <button id="swap-btn" class="shop-item">
+                    <span>Swap</span>
+                    <span class="item-cost">20 coins</span>
+                </button>
+                <button id="hint-btn" class="shop-item">
+                    <span>Hint</span>
+                    <span class="item-cost">20 coins</span>
+                </button>
+                <button id="life-btn" class="shop-item">
+                    <span>Extra Life</span>
+                    <span class="item-cost">50 coins</span>
+                </button>
+            </div>
+            <p id="shop-message" class="text-center text-sm mt-4 text-red-400"></p>
+        </div>
+    </div>
+
+    <script>
+        // Array of countries with population data and flag URLs
+        // Source: World Bank data, 2021-2023 estimates
+        const countries = [
+            { name: "China", population: 1425671352, flag: "https://flagcdn.com/cn.svg" },
+            { name: "India", population: 1417173173, flag: "https://flagcdn.com/in.svg" },
+            { name: "United States", population: 333287557, flag: "https://flagcdn.com/us.svg" },
+            { name: "Indonesia", population: 275501339, flag: "https://flagcdn.com/id.svg" },
+            { name: "Pakistan", population: 235824862, flag: "https://flagcdn.com/pk.svg" },
+            { name: "Nigeria", population: 218541212, flag: "https://flagcdn.com/ng.svg" },
+            { name: "Brazil", population: 215313498, flag: "https://flagcdn.com/br.svg" },
+            { name: "Bangladesh", population: 171186372, flag: "https://flagcdn.com/bd.svg" },
+            { name: "Russia", population: 144713300, flag: "https://flagcdn.com/ru.svg" },
+            { name: "Mexico", population: 127504125, flag: "https://flagcdn.com/mx.svg" },
+            { name: "Japan", population: 123951692, flag: "https://flagcdn.com/jp.svg" },
+            { name: "Ethiopia", population: 123379924, flag: "https://flagcdn.com/et.svg" },
+            { name: "Philippines", population: 115559009, flag: "https://flagcdn.com/ph.svg" },
+            { name: "Egypt", population: 110990103, flag: "https://flagcdn.com/eg.svg" },
+            { name: "Vietnam", population: 98186856, flag: "https://flagcdn.com/vn.svg" },
+            { name: "DR Congo", population: 99010212, flag: "https://flagcdn.com/cd.svg" },
+            { name: "Turkey", population: 85341241, flag: "https://flagcdn.com/tr.svg" },
+            { name: "Germany", population: 83294633, flag: "https://flagcdn.com/de.svg" },
+            { name: "Thailand", population: 71790442, flag: "https://flagcdn.com/th.svg" },
+            { name: "France", population: 64626628, flag: "https://flagcdn.com/fr.svg" },
+            { name: "United Kingdom", population: 67026292, flag: "https://flagcdn.com/gb.svg" },
+            { name: "Italy", population: 58870762, flag: "https://flagcdn.com/it.svg" },
+            { name: "South Africa", population: 59392255, flag: "https://flagcdn.com/za.svg" },
+            { name: "Spain", population: 47551000, flag: "https://flagcdn.com/es.svg" },
+            { name: "Canada", population: 38246108, flag: "https://flagcdn.com/ca.svg" },
+            { name: "Australia", population: 26068792, flag: "https://flagcdn.com/au.svg" },
+            { name: "Sweden", population: 10452326, flag: "https://flagcdn.com/se.svg" },
+            { name: "Finland", population: 5540720, flag: "https://flagcdn.com/fi.svg" },
+            { name: "Norway", population: 5491866, flag: "https://flagcdn.com/no.svg" },
+            { name: "Denmark", population: 5882260, flag: "https://flagcdn.com/dk.svg" },
+            { name: "New Zealand", population: 5122600, flag: "https://flagcdn.com/nz.svg" },
+            { name: "Ireland", population: 5011500, flag: "https://flagcdn.com/ie.svg" },
+            { name: "Iceland", population: 376000, flag: "https://flagcdn.com/is.svg" },
+            { name: "Malta", population: 535064, flag: "https://flagcdn.com/mt.svg" },
+            { name: "Monaco", population: 36469, flag: "https://flagcdn.com/mc.svg" },
+            { name: "Vatican City", population: 825, flag: "https://flagcdn.com/va.svg" }
+        ];
+
+        let score = 0;
+        let coins = 0;
+        let lives = 3;
+        let streak = 0;
+        let countryOne, countryTwo;
+        let gameOver = false;
+
+        const scoreDisplay = document.getElementById('score-display');
+        const streakDisplay = document.getElementById('streak-display');
+        const livesDisplay = document.getElementById('lives-display');
+        const coinsDisplay = document.getElementById('coins-display');
+        const flagOneImg = document.getElementById('flag-one');
+        const flagTwoImg = document.getElementById('flag-two');
+        const flagNameOne = document.getElementById('flag-name-one');
+        const flagNameTwo = document.getElementById('flag-name-two');
+        const populationOne = document.getElementById('population-one');
+        const higherBtn = document.getElementById('higher-btn');
+        const lowerBtn = document.getElementById('lower-btn');
+        const messageDisplay = document.getElementById('message');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const restartBtn = document.getElementById('restart-btn');
+        const cardsContainer = document.getElementById('cards-container');
+        const buttonsContainer = document.getElementById('buttons-container');
+        const shopBtn = document.getElementById('shop-btn');
+        const shopModal = document.getElementById('shop-modal');
+        const closeShopBtn = document.getElementById('close-shop-btn');
+        const modalCoinsDisplay = document.getElementById('modal-coins-display');
+        const passBtn = document.getElementById('pass-btn');
+        const swapBtn = document.getElementById('swap-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const lifeBtn = document.getElementById('life-btn');
+        const shopMessage = document.getElementById('shop-message');
+
+        // Function to format population numbers with commas
+        const formatPopulation = (num) => {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        };
+
+        // Function to get a random country from the list
+        const getRandomCountry = () => {
+            return countries[Math.floor(Math.random() * countries.length)];
+        };
+
+        // Function to start a new round
+        const newRound = () => {
+            if (gameOver) return;
+
+            // Shift countries
+            countryOne = countryTwo || getRandomCountry();
+            countryTwo = getRandomCountry();
+            while (countryTwo.name === countryOne.name) {
+                countryTwo = getRandomCountry();
+            }
+
+            // Update UI for card one with a simple fade-in
+            flagOneImg.src = countryOne.flag;
+            flagOneImg.alt = `${countryOne.name} flag`;
+            flagNameOne.textContent = countryOne.name;
+            populationOne.textContent = `Population: ${formatPopulation(countryOne.population)}`;
+            document.getElementById('card-one').classList.add('fade-in');
+
+            // Update UI for card two with a simple fade-in
+            flagTwoImg.src = countryTwo.flag;
+            flagTwoImg.alt = `${countryTwo.name} flag`;
+            flagNameTwo.textContent = countryTwo.name;
+            document.getElementById('card-two').classList.add('fade-in');
+
+            // Update streak display
+            streakDisplay.textContent = `Streak: ${streak}`;
+
+            // Clear result message
+            messageDisplay.textContent = '';
+            messageDisplay.className = 'result-message';
+        };
+
+        // Function to check the user's guess
+        const checkGuess = (guess) => {
+            if (gameOver) return;
+            const isHigher = countryTwo.population > countryOne.population;
+            const isCorrect = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
+
+            if (isCorrect) {
+                score++;
+                coins++; // Add a coin for a correct answer
+                streak++;
+                let bonusMessage = '';
+                if (streak > 0 && streak % 5 === 0) {
+                    // Award bonus points for every 5 consecutive correct answers
+                    score += 5;
+                    bonusMessage = ` (+5 Bonus!)`;
+                }
+                messageDisplay.textContent = `Correct! ${countryTwo.name} has a population of ${formatPopulation(countryTwo.population)}.${bonusMessage}`;
+                messageDisplay.classList.add('correct');
+            } else {
+                lives--;
+                streak = 0; // Reset streak on incorrect answer
+                messageDisplay.textContent = `Wrong! ${countryTwo.name} has a population of ${formatPopulation(countryTwo.population)}.`;
+                messageDisplay.classList.add('incorrect');
+                // Add a shake animation for incorrect guess
+                document.getElementById('card-two').classList.add('shake');
+            }
+            scoreDisplay.textContent = `Score: ${score}`;
+            livesDisplay.textContent = `Lives: ${lives}`;
+            streakDisplay.textContent = `Streak: ${streak}`;
+            coinsDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>${coins}`;
+
+            // Check for game over
+            if (lives <= 0) {
+                endGame();
+            } else {
+                // Wait a moment before starting the next round
+                setTimeout(() => {
+                    document.getElementById('card-one').classList.remove('fade-in');
+                    document.getElementById('card-two').classList.remove('fade-in', 'shake');
+                    newRound();
+                }, 2000);
+            }
+        };
+
+        // Function to end the game
+        const endGame = () => {
+            gameOver = true;
+            cardsContainer.classList.add('hidden');
+            buttonsContainer.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = `Final Score: ${score}`;
+        };
+
+        // Function to restart the game
+        const restartGame = () => {
+            score = 0;
+            coins = 0;
+            lives = 3;
+            streak = 0;
+            gameOver = false;
+            scoreDisplay.textContent = `Score: ${score}`;
+            livesDisplay.textContent = `Lives: ${lives}`;
+            streakDisplay.textContent = `Streak: ${streak}`;
+            coinsDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>${coins}`;
+            messageDisplay.textContent = '';
+            gameOverScreen.classList.add('hidden');
+            cardsContainer.classList.remove('hidden');
+            buttonsContainer.classList.remove('hidden');
+            newRound();
+        };
+
+        // Shop Functions
+        const openShop = () => {
+            shopModal.classList.remove('hidden');
+            modalCoinsDisplay.textContent = coins;
+            shopMessage.textContent = '';
+        };
+
+        const closeShop = () => {
+            shopModal.classList.add('hidden');
+        };
+
+        const purchaseItem = (cost, callback) => {
+            if (coins >= cost) {
+                coins -= cost;
+                coinsDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>${coins}`;
+                modalCoinsDisplay.textContent = coins;
+                callback();
+                closeShop();
+            } else {
+                shopMessage.textContent = "Not enough coins!";
+            }
+        };
+
+        // Shop Item Callbacks
+        const buyPass = () => {
+            const nextCountry = getRandomCountry();
+            while (nextCountry.name === countryOne.name || nextCountry.name === countryTwo.name) {
+                nextCountry = getRandomCountry();
+            }
+            countryTwo = nextCountry;
+            flagTwoImg.src = countryTwo.flag;
+            flagTwoImg.alt = `${countryTwo.name} flag`;
+            flagNameTwo.textContent = countryTwo.name;
+            messageDisplay.textContent = "Second country has been switched!";
+        };
+
+        const buySwap = () => {
+            newRound(); // Effectively swaps both countries
+            messageDisplay.textContent = "Both countries have been swapped!";
+        };
+
+        const buyHint = () => {
+            const hintMessage = countryTwo.population > 100000000 ? "This country has a population over 100 million." : "This country has a population under 100 million.";
+            messageDisplay.textContent = hintMessage;
+        };
+        
+        const buyLife = () => {
+            lives++;
+            livesDisplay.textContent = `Lives: ${lives}`;
+            messageDisplay.textContent = "An extra life has been added!";
+        };
+
+        // Event listeners
+        higherBtn.addEventListener('click', () => checkGuess('higher'));
+        lowerBtn.addEventListener('click', () => checkGuess('lower'));
+        restartBtn.addEventListener('click', restartGame);
+        shopBtn.addEventListener('click', openShop);
+        closeShopBtn.addEventListener('click', closeShop);
+        passBtn.addEventListener('click', () => purchaseItem(20, buyPass));
+        swapBtn.addEventListener('click', () => purchaseItem(20, buySwap));
+        hintBtn.addEventListener('click', () => purchaseItem(20, buyHint));
+        lifeBtn.addEventListener('click', () => purchaseItem(50, buyLife));
+
+        // Initial setup
+        window.onload = newRound;
+
+    </script>
+</body>
+</html>
