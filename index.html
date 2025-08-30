@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higher or Lower Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .copperplate-font {
+            font-family: 'Copperplate', 'Copperplate Gothic Light', serif;
+        }
+        .container {
+            background-color: #2e2a44;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 48rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .card {
+            background-color: #3b3058;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card img {
+            width: 100%;
+            max-width: 15rem;
+            height: auto;
+            border-radius: 0.5rem;
+            border: 2px solid #5d5d81;
+        }
+        .flag-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #c9c1f2;
+            text-align: center;
+        }
+        .population-text {
+            font-size: 1.125rem;
+            color: #a0a0c0;
+            text-align: center;
+        }
+        .vs-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #7d7d9e;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn {
+            background-color: #6a4c93;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #7b5da6;
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .game-info-line {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 1rem;
+        }
+        .result-message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            text-align: center;
+            min-height: 2.5rem;
+        }
+        .correct {
+            color: #4ade80;
+        }
+        .incorrect {
+            color: #ef4444;
+        }
+        .game-over-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+        }
+        .game-over-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fca5a5;
+        }
+        .final-score {
+            font-size: 1.5rem;
+            color: #fca5a5;
+        }
+        .hidden {
+            display: none;
+        }
+        #coins-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffde54;
+        }
+        .shop-modal {
+            background-color: #3b3058;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 28rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 90;
+        }
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .shop-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #4b3e6a;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .shop-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .item-cost {
+            font-size: 0.875rem;
+            color: #ffde54;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        .homepage-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 20rem;
+        }
+        .homepage-buttons .btn {
+            width: 100%;
+        }
+        .game-selection-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .game-selection-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .difficulty-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .difficulty-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        .facts-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .facts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+        .facts-table th, .facts-table td {
+            border: 1px solid #4b3e6a;
+            padding: 0.75rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .facts-table th {
+            background-color: #3b3058;
+            cursor: pointer;
+        }
+        .facts-table tbody tr:nth-child(even) {
+            background-color: #2e2a44;
+        }
+        .facts-table tbody tr:nth-child(odd) {
+            background-color: #3b3058;
+        }
+        .facts-table td img {
+            height: 1.5rem;
+            width: auto;
+        }
+        .facts-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sort-arrow {
+            font-size: 0.75rem;
+        }
+        .lifeline-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .lifeline-btn {
+            background-color: #5d5d81;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.75rem;
+        }
+        .lifeline-btn:hover {
+            background-color: #7d7d9e;
+        }
+        .lifeline-btn span {
+            font-size: 0.6rem;
+            color: #a0a0c0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen">
+    <div id="app-container" class="container">
+        <!-- Home Page -->
+        <div id="home-page">
+            <h1 class="text-4xl font-bold text-center text-purple-300 copperplate-font">Skellium Games Presents:<br>Higher or Lower: Countries.</h1>
+            <p class="text-center text-lg mt-2">Compare countries by their stats! Get coins, buy lifelines, and climb the leaderboard.</p>
+            <div class="homepage-buttons mt-8">
+                <button id="play-btn" class="btn">Play</button>
+                <button id="facts-btn" class="btn">See Facts</button>
+                <button id="rules-btn" class="btn">Rules</button>
+            </div>
+        </div>
+
+        <!-- Game Selection Page -->
+        <div id="game-select-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-purple-300">Choose a Game</h2>
+            <div class="game-selection-grid mt-4">
+                <button class="btn game-mode-btn" data-mode="population">Population</button>
+                <button class="btn game-mode-btn" data-mode="size">Size</button>
+                <button class="btn game-mode-btn" data-mode="gdp">GDP</button>
+            </div>
+            <h3 class="text-2xl font-bold text-center text-purple-300 mt-6">Select Difficulty</h3>
+            <div class="difficulty-buttons mt-4">
+                <button class="btn difficulty-btn" data-difficulty="easy">Easy</button>
+                <button class="btn difficulty-btn" data-difficulty="medium">Medium</button>
+                <button class="btn difficulty-btn" data-difficulty="hard">Hard</button>
+                <button class="btn difficulty-btn" data-difficulty="random">Random</button>
+            </div>
+            <button id="back-to-home-btn" class="btn mt-4">Back</button>
+        </div>
+
+        <!-- Game Page -->
+        <div id="game-page" class="hidden">
+            <div class="w-full flex justify-between items-center mb-4">
+                <button id="back-to-home-from-game-btn" class="btn">Back</button>
+                <button id="shop-btn" class="btn">Shop</button>
+            </div>
+            <div class="game-info-line">
+                <span id="score-display">Score: 0</span>
+                <span id="streak-display">Streak: 0</span>
+                <span id="lives-display">Lives: 3</span>
+            </div>
+            <div class="game-info-line">
+                <span id="coins-display"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>0</span>
+            </div>
+            <div class="lifeline-buttons">
+                <button id="use-pass-btn" class="lifeline-btn">Pass <span>(0)</span></button>
+                <button id="use-swap-btn" class="lifeline-btn">Swap <span>(0)</span></button>
+                <button id="use-hint-btn" class="lifeline-btn">Hint <span>(0)</span></button>
+            </div>
+
+            <div id="cards-container" class="w-full flex flex-col items-center gap-4 md:flex-row md:justify-center">
+                <div id="card-one" class="card fade-in">
+                    <p id="flag-name-one" class="flag-name">Country One</p>
+                    <img id="flag-one" src="" alt="Country Flag">
+                    <p id="stat-one" class="population-text">Population: Calculating...</p>
+                </div>
+                
+                <p class="vs-text">VS</p>
+
+                <div id="card-two" class="card fade-in">
+                    <p id="flag-name-two" class="flag-name">Country Two</p>
+                    <img id="flag-two" src="" alt="Country Flag">
+                    <p class="population-text" id="stat-two-label">Higher or Lower?</p>
+                </div>
+            </div>
+
+            <div id="buttons-container" class="buttons-container">
+                <button id="higher-btn" class="btn">Higher</button>
+                <button id="lower-btn" class="btn">Lower</button>
+            </div>
+            
+            <p id="message" class="result-message"></p>
+
+            <div id="game-over-screen" class="game-over-container hidden">
+                <h2 class="game-over-title">Game Over!</h2>
+                <p id="final-score" class="final-score"></p>
+                <div class="homepage-buttons mt-4">
+                    <button id="replay-btn" class="btn">Replay</button>
+                    <button id="back-to-home-from-game-over-btn" class="btn">Return to Home</button>
+                    <button id="share-score-btn" class="btn">Share Score</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Shop Modal -->
+        <div id="shop-modal" class="hidden modal-overlay">
+            <div class="shop-modal">
+                <button id="close-shop-btn" class="modal-close-btn">&times;</button>
+                <h3 class="text-2xl font-bold text-center text-purple-300 mb-4">Shop</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-lg">Your Coins:</p>
+                    <p id="modal-coins-display" class="text-lg font-bold text-yellow-300">0</p>
+                </div>
+                <div class="shop-items">
+                    <button id="buy-pass-btn" class="shop-item">
+                        <span>Pass</span>
+                        <span class="item-cost">20 coins</span>
+                    </button>
+                    <button id="buy-swap-btn" class="shop-item">
+                        <span>Swap</span>
+                        <span class="item-cost">20 coins</span>
+                    </button>
+                    <button id="buy-hint-btn" class="shop-item">
+                        <span>Hint</span>
+                        <span class="item-cost">5 coins</span>
+                    </button>
+                    <button id="buy-life-btn" class="shop-item">
+                        <span>Extra Life</span>
+                        <span class="item-cost">50 coins</span>
+                    </button>
+                </div>
+                <p id="shop-message" class="text-center text-sm mt-4 text-red-400"></p>
+            </div>
+        </div>
+
+        <!-- Facts Page -->
+        <div id="facts-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-purple-300">Country Facts</h2>
+            <div class="facts-table-container">
+                <table id="facts-table" class="facts-table">
+                    <thead>
+                        <tr>
+                            <th id="sort-country" class="facts-header">Country <span class="sort-arrow"></span></th>
+                            <th id="sort-population" class="facts-header">Population <span class="sort-arrow">▲</span></th>
+                            <th id="sort-size" class="facts-header">Size (km²) <span class="sort-arrow"></span></th>
+                            <th id="sort-gdp" class="facts-header">GDP ($) <span class="sort-arrow"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <button id="back-from-facts-btn" class="btn mt-4">Back</button>
+        </div>
+
+        <!-- Rules Page -->
+        <div id="rules-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-purple-300">Rules</h2>
+            <div class="text-lg mt-4 text-center">
+                <p>You will be shown a country and its first fact (population, size, or GDP).</p>
+                <p>A second country will appear. You must guess if its stat is **higher** or **lower** than the first country's.</p>
+                <p>Guess correctly to get coins and increase your score. Guess incorrectly and you lose a life.</p>
+                <p>Buy lifelines in the shop to help you when you're stuck!</p>
+            </div>
+            <button id="back-from-rules-btn" class="btn mt-4">Back</button>
+        </div>
+    </div>
+    <script>
+        const countries = [
+            { name: "Afghanistan", iso2: "af", population: 41128771, size: 652864, gdp: 14580000000 },
+            { name: "Albania", iso2: "al", population: 2832439, size: 28748, gdp: 18900000000 },
+            { name: "Algeria", iso2: "dz", population: 44903225, size: 2381741, gdp: 191900000000 },
+            { name: "Andorra", iso2: "ad", population: 79824, size: 468, gdp: 3330000000 },
+            { name: "Angola", iso2: "ao", population: 35588987, size: 1246700, gdp: 106700000000 },
+            { name: "Antigua and Barbuda", iso2: "ag", population: 93763, size: 442, gdp: 1800000000 },
+            { name: "Argentina", iso2: "ar", population: 45585000, size: 2780400, gdp: 631100000000 },
+            { name: "Armenia", iso2: "am", population: 2780469, size: 29743, gdp: 23720000000 },
+            { name: "Australia", iso2: "au", population: 26068792, size: 7692024, gdp: 1700000000000 },
+            { name: "Austria", iso2: "at", population: 8939617, size: 83879, gdp: 471000000000 },
+            { name: "Azerbaijan", iso2: "az", population: 10358074, size: 86600, gdp: 72360000000 },
+            { name: "Bahamas", iso2: "bs", population: 409984, size: 13880, gdp: 12000000000 },
+            { name: "Bahrain", iso2: "bh", population: 1472233, size: 765, gdp: 43550000000 },
+            { name: "Bangladesh", iso2: "bd", population: 171186372, size: 147570, gdp: 460200000000 },
+            { name: "Barbados", iso2: "bb", population: 281635, size: 430, gdp: 5970000000 },
+            { name: "Belarus", iso2: "by", population: 9534954, size: 207600, gdp: 72790000000 },
+            { name: "Belgium", iso2: "be", population: 11655933, size: 30528, gdp: 625800000000 },
+            { name: "Belize", iso2: "bz", population: 405635, size: 22966, gdp: 3080000000 },
+            { name: "Benin", iso2: "bj", population: 13352864, size: 114763, gdp: 18880000000 },
+            { name: "Bhutan", iso2: "bt", population: 782455, size: 38394, gdp: 2800000000 },
+            { name: "Bolivia", iso2: "bo", population: 12224110, size: 1098581, gdp: 43300000000 },
+            { name: "Bosnia and Herzegovina", iso2: "ba", population: 3233526, size: 51197, gdp: 24650000000 },
+            { name: "Botswana", iso2: "bw", population: 2630296, size: 581730, gdp: 20040000000 },
+            { name: "Brazil", iso2: "br", population: 215313498, size: 8515767, gdp: 1920000000000 },
+            { name: "Brunei", iso2: "bn", population: 449002, size: 5765, gdp: 14000000000 },
+            { name: "Bulgaria", iso2: "bg", population: 6781954, size: 110994, gdp: 90050000000 },
+            { name: "Burkina Faso", iso2: "bf", population: 22673767, size: 274200, gdp: 19740000000 },
+            { name: "Burundi", iso2: "bi", population: 12889576, size: 27834, gdp: 3080000000 },
+            { name: "Cabo Verde", iso2: "cv", population: 593149, size: 4033, gdp: 2230000000 },
+            { name: "Cambodia", iso2: "kh", population: 16767842, size: 181035, gdp: 30000000000 },
+            { name: "Cameroon", iso2: "cm", population: 27914536, size: 475442, gdp: 45340000000 },
+            { name: "Canada", iso2: "ca", population: 38246108, size: 9984670, gdp: 2140000000000 },
+            { name: "Central African Republic", iso2: "cf", population: 5579144, size: 622984, gdp: 2510000000 },
+            { name: "Chad", iso2: "td", population: 17723315, size: 1284000, gdp: 11770000000 },
+            { name: "Chile", iso2: "cl", population: 19603738, size: 756102, gdp: 307900000000 },
+            { name: "China", iso2: "cn", population: 1425671352, size: 9596961, gdp: 19374000000000 },
+            { name: "Colombia", iso2: "co", population: 51874024, size: 1141748, gdp: 343600000000 },
+            { name: "Comoros", iso2: "km", population: 836774, size: 1862, gdp: 1360000000 },
+            { name: "DR Congo", iso2: "cd", population: 99010212, size: 2344858, gdp: 64720000000 },
+            { name: "Republic of the Congo", iso2: "cg", population: 5970424, size: 342000, gdp: 15460000000 },
+            { name: "Costa Rica", iso2: "cr", population: 5180829, size: 51100, gdp: 86320000000 },
+            { name: "Cote d'Ivoire", iso2: "ci", population: 28160542, size: 322463, gdp: 86130000000 },
+            { name: "Croatia", iso2: "hr", population: 4008617, size: 56594, gdp: 80000000000 },
+            { name: "Cuba", iso2: "cu", population: 11212191, size: 109884, gdp: 121000000000 },
+            { name: "Cyprus", iso2: "cy", population: 1251488, size: 9251, gdp: 29200000000 },
+            { name: "Czechia", iso2: "cz", population: 10493627, size: 78867, gdp: 326700000000 },
+            { name: "Denmark", iso2: "dk", population: 5882260, size: 43094, gdp: 400100000000 },
+            { name: "Djibouti", iso2: "dj", population: 1120849, size: 23200, gdp: 3950000000 },
+            { name: "Dominica", iso2: "dm", population: 73000, size: 751, gdp: 640000000 },
+            { name: "Dominican Republic", iso2: "do", population: 11228821, size: 48671, gdp: 113500000000 },
+            { name: "Ecuador", iso2: "ec", population: 18001000, size: 283561, gdp: 118400000000 },
+            { name: "Egypt", iso2: "eg", population: 110990103, size: 1010408, gdp: 387100000000 },
+            { name: "El Salvador", iso2: "sv", population: 6330455, size: 21041, gdp: 32490000000 },
+            { name: "Equatorial Guinea", iso2: "gq", population: 1674908, size: 28051, gdp: 12430000000 },
+            { name: "Eritrea", iso2: "er", population: 3684032, size: 117600, gdp: 2000000000 },
+            { name: "Estonia", iso2: "ee", population: 1326062, size: 45227, gdp: 41040000000 },
+            { name: "Eswatini", iso2: "sz", population: 1201991, size: 17364, gdp: 4740000000 },
+            { name: "Ethiopia", iso2: "et", population: 123379924, size: 1104300, gdp: 126200000000 },
+            { name: "Fiji", iso2: "fj", population: 929766, size: 18272, gdp: 5490000000 },
+            { name: "Finland", iso2: "fi", population: 5540720, size: 338424, gdp: 295000000000 },
+            { name: "France", iso2: "fr", population: 64626628, size: 551695, gdp: 2780000000000 },
+            { name: "Gabon", iso2: "ga", population: 2380690, size: 267667, gdp: 21870000000 },
+            { name: "Gambia", iso2: "gm", population: 2705992, size: 11300, gdp: 2080000000 },
+            { name: "Georgia", iso2: "ge", population: 3744605, size: 69700, gdp: 29630000000 },
+            { name: "Germany", iso2: "de", population: 83294633, size: 357022, gdp: 4072000000000 },
+            { name: "Ghana", iso2: "gh", population: 33475870, size: 238533, gdp: 73670000000 },
+            { name: "Greece", iso2: "gr", population: 10384792, size: 131957, gdp: 221700000000 },
+            { name: "Grenada", iso2: "gd", population: 125438, size: 344, gdp: 1280000000 },
+            { name: "Guatemala", iso2: "gt", population: 17357876, size: 108889, gdp: 95000000000 },
+            { name: "Guinea", iso2: "gn", population: 13865691, size: 245857, gdp: 20490000000 },
+            { name: "Guinea-Bissau", iso2: "gw", population: 2105566, size: 36125, gdp: 2000000000 },
+            { name: "Guyana", iso2: "gy", population: 808792, size: 214969, gdp: 15360000000 },
+            { name: "Haiti", iso2: "ht", population: 11546736, size: 27750, gdp: 12900000000 },
+            { name: "Honduras", iso2: "hn", population: 10221247, size: 112492, gdp: 31730000000 },
+            { name: "Hungary", iso2: "hu", population: 9967308, size: 93028, gdp: 181700000000 },
+            { name: "Iceland", iso2: "is", population: 376000, size: 103000, gdp: 28020000000 },
+            { name: "India", iso2: "in", population: 1417173173, size: 3287590, gdp: 3386000000000 },
+            { name: "Indonesia", iso2: "id", population: 275501339, size: 1904569, gdp: 1319000000000 },
+            { name: "Iran", iso2: "ir", population: 88550570, size: 1648195, gdp: 368100000000 },
+            { name: "Iraq", iso2: "iq", population: 44496122, size: 438317, gdp: 264100000000 },
+            { name: "Ireland", iso2: "ie", population: 5011500, size: 70273, gdp: 529400000000 },
+            { name: "Israel", iso2: "il", population: 9038300, size: 22072, gdp: 522000000000 },
+            { name: "Italy", iso2: "it", population: 58870762, size: 301340, gdp: 2010000000000 },
+            { name: "Jamaica", iso2: "jm", population: 2825547, size: 10991, gdp: 17100000000 },
+            { name: "Japan", iso2: "jp", population: 123951692, size: 377975, gdp: 4231000000000 },
+            { name: "Jordan", iso2: "jo", population: 11285869, size: 89342, gdp: 47450000000 },
+            { name: "Kazakhstan", iso2: "kz", population: 19623894, size: 2724900, gdp: 220500000000 },
+            { name: "Kenya", iso2: "ke", population: 54027487, size: 580367, gdp: 113400000000 },
+            { name: "Kiribati", iso2: "ki", population: 131232, size: 811, gdp: 250000000 },
+            { name: "Kuwait", iso2: "kw", population: 4268873, size: 17818, gdp: 176900000000 },
+            { name: "Kyrgyzstan", iso2: "kg", population: 6630623, size: 199951, gdp: 13580000000 },
+            { name: "Laos", iso2: "la", population: 7529475, size: 236800, gdp: 15320000000 },
+            { name: "Latvia", iso2: "lv", population: 1850651, size: 64589, gdp: 44360000000 },
+            { name: "Lebanon", iso2: "lb", population: 5489739, size: 10452, gdp: 24700000000 },
+            { name: "Lesotho", iso2: "ls", population: 2305825, size: 30355, gdp: 2700000000 },
+            { name: "Liberia", iso2: "lr", population: 5302677, size: 111369, gdp: 3950000000 },
+            { name: "Libya", iso2: "ly", population: 6812341, size: 1759540, gdp: 45750000000 },
+            { name: "Liechtenstein", iso2: "li", population: 39327, size: 160, gdp: 7200000000 },
+            { name: "Lithuania", iso2: "lt", population: 2717983, size: 65300, gdp: 78560000000 },
+            { name: "Luxembourg", iso2: "lu", population: 647599, size: 2586, gdp: 86450000000 },
+            { name: "Madagascar", iso2: "mg", population: 29611719, size: 587041, gdp: 14750000000 },
+            { name: "Malawi", iso2: "mw", population: 20405317, size: 118484, gdp: 13100000000 },
+            { name: "Malaysia", iso2: "my", population: 33938240, size: 330803, gdp: 406300000000 },
+            { name: "Maldives", iso2: "mv", population: 523787, size: 298, gdp: 6720000000 },
+            { name: "Mali", iso2: "ml", population: 22594057, size: 1240192, gdp: 19930000000 },
+            { name: "Malta", iso2: "mt", population: 535064, size: 316, gdp: 18000000000 },
+            { name: "Marshall Islands", iso2: "mh", population: 59640, size: 181, gdp: 280000000 },
+            { name: "Mauritania", iso2: "mr", population: 4736132, size: 1030700, gdp: 10370000000 },
+            { name: "Mauritius", iso2: "mu", population: 1299469, size: 2040, gdp: 12900000000 },
+            { name: "Mexico", iso2: "mx", population: 127504125, size: 1964375, gdp: 1470000000000 },
+            { name: "Micronesia", iso2: "fm", population: 114164, size: 702, gdp: 420000000 },
+            { name: "Moldova", iso2: "md", population: 2617820, size: 33846, gdp: 14200000000 },
+            { name: "Monaco", iso2: "mc", population: 36469, size: 2, gdp: 8600000000 },
+            { name: "Mongolia", iso2: "mn", population: 3398366, size: 1564116, gdp: 19440000000 },
+            { name: "Montenegro", iso2: "me", population: 620000, size: 13812, gdp: 6730000000 },
+            { name: "Morocco", iso2: "ma", population: 37457971, size: 710850, gdp: 142800000000 },
+            { name: "Mozambique", iso2: "mz", population: 32969517, size: 799380, gdp: 19550000000 },
+            { name: "Myanmar", iso2: "mm", population: 54179306, size: 676578, gdp: 60160000000 },
+            { name: "Namibia", iso2: "na", population: 2567012, size: 825615, gdp: 12910000000 },
+            { name: "Nauru", iso2: "nr", population: 12668, size: 21, gdp: 130000000 },
+            { name: "Nepal", iso2: "np", population: 30547580, size: 147516, gdp: 40830000000 },
+            { name: "Netherlands", iso2: "nl", population: 17700000, size: 41850, gdp: 1094000000000 },
+            { name: "New Zealand", iso2: "nz", population: 5122600, size: 268021, gdp: 243400000000 },
+            { name: "Nicaragua", iso2: "ni", population: 6948392, size: 130373, gdp: 17530000000 },
+            { name: "Niger", iso2: "ne", population: 26207977, size: 1267000, gdp: 16750000000 },
+            { name: "Nigeria", iso2: "ng", population: 218541212, size: 923768, gdp: 477400000000 },
+            { name: "North Korea", iso2: "kp", population: 26069000, size: 120540, gdp: 30000000000 },
+            { name: "North Macedonia", iso2: "mk", population: 2093551, size: 25713, gdp: 13740000000 },
+            { name: "Norway", iso2: "no", population: 5491866, size: 385207, gdp: 551900000000 },
+            { name: "Oman", iso2: "om", population: 4520471, size: 309500, gdp: 114700000000 },
+            { name: "Pakistan", iso2: "pk", population: 235824862, size: 881912, gdp: 376500000000 },
+            { name: "Palau", iso2: "pw", population: 18023, size: 459, gdp: 260000000 },
+            { name: "Palestine", iso2: "ps", population: 5354924, size: 6220, gdp: 19100000000 },
+            { name: "Panama", iso2: "pa", population: 4408581, size: 75417, gdp: 80190000000 },
+            { name: "Papua New Guinea", iso2: "pg", population: 10142600, size: 462840, gdp: 30730000000 },
+            { name: "Paraguay", iso2: "py", population: 6780744, size: 406752, gdp: 43300000000 },
+            { name: "Peru", iso2: "pe", population: 34049588, size: 1285216, gdp: 240000000000 },
+            { name: "Philippines", iso2: "ph", population: 115559009, size: 300000, gdp: 404300000000 },
+            { name: "Poland", iso2: "pl", population: 37950000, size: 312696, gdp: 842100000000 },
+            { name: "Portugal", iso2: "pt", population: 10270865, size: 92212, gdp: 267600000000 },
+            { name: "Qatar", iso2: "qa", population: 2695119, size: 11586, gdp: 236200000000 },
+            { name: "Romania", iso2: "ro", population: 19053815, size: 238397, gdp: 348900000000 },
+            { name: "Russia", iso2: "ru", population: 144713300, size: 17098246, gdp: 2244000000000 },
+            { name: "Rwanda", iso2: "rw", population: 13776698, size: 26338, gdp: 13580000000 },
+            { name: "Saint Kitts and Nevis", iso2: "kn", population: 47606, size: 261, gdp: 900000000 },
+            { name: "Saint Lucia", iso2: "lc", population: 185000, size: 616, gdp: 2470000000 },
+            { name: "Saint Vincent and the Grenadines", iso2: "vc", population: 103948, size: 389, gdp: 1030000000 },
+            { name: "Samoa", iso2: "ws", population: 222382, size: 2842, gdp: 920000000 },
+            { name: "San Marino", iso2: "sm", population: 33660, size: 61, gdp: 1850000000 },
+            { name: "Sao Tome and Principe", iso2: "st", population: 227380, size: 964, gdp: 600000000 },
+            { name: "Saudi Arabia", iso2: "sa", population: 36408820, size: 2149690, gdp: 1060000000000 },
+            { name: "Senegal", iso2: "sn", population: 17365000, size: 196712, gdp: 29110000000 },
+            { name: "Serbia", iso2: "rs", population: 7149077, size: 88361, gdp: 72930000000 },
+            { name: "Seychelles", iso2: "sc", population: 107000, size: 452, gdp: 2330000000 },
+            { name: "Sierra Leone", iso2: "sl", population: 8420641, size: 71740, gdp: 4010000000 },
+            { name: "Singapore", iso2: "sg", population: 5637000, size: 719, gdp: 466800000000 },
+            { name: "Slovakia", iso2: "sk", population: 5447721, size: 49035, gdp: 121000000000 },
+            { name: "Slovenia", iso2: "si", population: 2119091, size: 20273, gdp: 67100000000 },
+            { name: "Solomon Islands", iso2: "sb", population: 724273, size: 28400, gdp: 1610000000 },
+            { name: "Somalia", iso2: "so", population: 17066000, size: 637657, gdp: 10240000000 },
+            { name: "South Africa", iso2: "za", population: 59392255, size: 1221037, gdp: 405800000000 },
+            { name: "South Korea", iso2: "kr", population: 51740000, size: 100210, gdp: 1712000000000 },
+            { name: "South Sudan", iso2: "ss", population: 10975618, size: 644329, gdp: 4930000000 },
+            { name: "Spain", iso2: "es", population: 47551000, size: 505990, gdp: 1400000000000 },
+            { name: "Sri Lanka", iso2: "lk", population: 21803000, size: 65610, gdp: 74800000000 },
+            { name: "Sudan", iso2: "sd", population: 46837549, size: 1886068, gdp: 42680000000 },
+            { name: "Suriname", iso2: "sr", population: 612985, size: 163820, gdp: 3950000000 },
+            { name: "Sweden", iso2: "se", population: 10452326, size: 450295, gdp: 591600000000 },
+            { name: "Switzerland", iso2: "ch", population: 8740472, size: 41285, gdp: 807200000000 },
+            { name: "Syria", iso2: "sy", population: 22125249, size: 185180, gdp: 20000000000 },
+            { name: "Tajikistan", iso2: "tj", population: 9957464, size: 143100, gdp: 11110000000 },
+            { name: "Tanzania", iso2: "tz", population: 65497748, size: 945087, gdp: 75780000000 },
+            { name: "Thailand", iso2: "th", population: 71790442, size: 513120, gdp: 495400000000 },
+            { name: "Timor-Leste", iso2: "tl", population: 1341296, size: 14874, gdp: 2150000000 },
+            { name: "Togo", iso2: "tg", population: 8848699, size: 56785, gdp: 9020000000 },
+            { name: "Tonga", iso2: "to", population: 106017, size: 747, gdp: 520000000 },
+            { name: "Trinidad and Tobago", iso2: "tt", population: 1534937, size: 5131, gdp: 24700000000 },
+            { name: "Tunisia", iso2: "tn", population: 12046656, size: 163610, gdp: 46680000000 },
+            { name: "Turkey", iso2: "tr", population: 85341241, size: 783562, gdp: 1154000000000 },
+            { name: "Turkmenistan", iso2: "tm", population: 6430770, size: 488100, gdp: 62510000000 },
+            { name: "Tuvalu", iso2: "tv", population: 11312, size: 26, gdp: 60000000 },
+            { name: "Uganda", iso2: "ug", population: 47249585, size: 241550, gdp: 46370000000 },
+            { name: "Ukraine", iso2: "ua", population: 39700000, size: 603500, gdp: 151500000000 },
+            { name: "United Arab Emirates", iso2: "ae", population: 9441129, size: 83600, gdp: 509200000000 },
+            { name: "United Kingdom", iso2: "gb", population: 67026292, size: 242495, gdp: 3071000000000 },
+            { name: "United States", iso2: "us", population: 333287557, size: 9833520, gdp: 25463000000000 },
+            { name: "Uruguay", iso2: "uy", population: 3422794, size: 176215, gdp: 71190000000 },
+            { name: "Uzbekistan", iso2: "uz", population: 34627602, size: 447400, gdp: 90390000000 },
+            { name: "Vanuatu", iso2: "vu", population: 326740, size: 12189, gdp: 1130000000 },
+            { name: "Vatican City", iso2: "va", population: 825, size: 0.44, gdp: 315000000 },
+            { name: "Venezuela", iso2: "ve", population: 28301696, size: 916445, gdp: 48240000000 },
+            { name: "Vietnam", iso2: "vn", population: 98186856, size: 331212, gdp: 413800000000 },
+            { name: "Yemen", iso2: "ye", population: 33696614, size: 527968, gdp: 20900000000 },
+            { name: "Zambia", iso2: "zm", population: 19610178, size: 752618, gdp: 29840000000 },
+            { name: "Zimbabwe", iso2: "zw", population: 16320537, size: 390757, gdp: 28380000000 },
+            { name: "Burundi", iso2: "bi", population: 12889576, size: 27834, gdp: 3080000000 },
+            { name: "Cabo Verde", iso2: "cv", population: 593149, size: 4033, gdp: 2230000000 },
+            { name: "Cambodia", iso2: "kh", population: 16767842, size: 181035, gdp: 30000000000 },
+            { name: "Cameroon", iso2: "cm", population: 27914536, size: 475442, gdp: 45340000000 },
+            { name: "Canada", iso2: "ca", population: 38246108, size: 9984670, gdp: 2140000000000 },
+            { name: "Central African Republic", iso2: "cf", population: 5579144, size: 622984, gdp: 2510000000 },
+            { name: "Chad", iso2: "td", population: 17723315, size: 1284000, gdp: 11770000000 },
+            { name: "Chile", iso2: "cl", population: 19603738, size: 756102, gdp: 307900000000 },
+            { name: "China", iso2: "cn", population: 1425671352, size: 9596961, gdp: 19374000000000 },
+            { name: "Colombia", iso2: "co", population: 51874024, size: 1141748, gdp: 343600000000 },
+            { name: "Comoros", iso2: "km", population: 836774, size: 1862, gdp: 1360000000 },
+            { name: "DR Congo", iso2: "cd", population: 99010212, size: 2344858, gdp: 64720000000 },
+            { name: "Republic of the Congo", iso2: "cg", population: 5970424, size: 342000, gdp: 15460000000 },
+            { name: "Costa Rica", iso2: "cr", population: 5180829, size: 51100, gdp: 86320000000 },
+            { name: "Cote d'Ivoire", iso2: "ci", population: 28160542, size: 322463, gdp: 86130000000 },
+            { name: "Croatia", iso2: "hr", population: 4008617, size: 56594, gdp: 80000000000 },
+            { name: "Cuba", iso2: "cu", population: 11212191, size: 109884, gdp: 121000000000 },
+            { name: "Cyprus", iso2: "cy", population: 1251488, size: 9251, gdp: 29200000000 },
+            { name: "Czechia", iso2: "cz", population: 10493627, size: 78867, gdp: 326700000000 },
+            { name: "Denmark", iso2: "dk", population: 5882260, size: 43094, gdp: 400100000000 },
+            { name: "Djibouti", iso2: "dj", population: 1120849, size: 23200, gdp: 3950000000 },
+            { name: "Dominica", iso2: "dm", population: 73000, size: 751, gdp: 640000000 },
+            { name: "Dominican Republic", iso2: "do", population: 11228821, size: 48671, gdp: 113500000000 },
+            { name: "Ecuador", iso2: "ec", population: 18001000, size: 283561, gdp: 118400000000 },
+            { name: "Egypt", iso2: "eg", population: 110990103, size: 1010408, gdp: 387100000000 },
+            { name: "El Salvador", iso2: "sv", population: 6330455, size: 21041, gdp: 32490000000 },
+            { name: "Equatorial Guinea", iso2: "gq", population: 1674908, size: 28051, gdp: 12430000000 },
+            { name: "Eritrea", iso2: "er", population: 3684032, size: 117600, gdp: 2000000000 },
+            { name: "Estonia", iso2: "ee", population: 1326062, size: 45227, gdp: 41040000000 },
+            { name: "Eswatini", iso2: "sz", population: 1201991, size: 17364, gdp: 4740000000 },
+            { name: "Ethiopia", iso2: "et", population: 123379924, size: 1104300, gdp: 126200000000 },
+            { name: "Fiji", iso2: "fj", population: 929766, size: 18272, gdp: 5490000000 },
+            { name: "Finland", iso2: "fi", population: 5540720, size: 338424, gdp: 295000000000 },
+            { name: "France", iso2: "fr", population: 64626628, size: 551695, gdp: 2780000000000 },
+            { name: "Gabon", iso2: "ga", population: 2380690, size: 267667, gdp: 21870000000 },
+            { name: "Gambia", iso2: "gm", population: 2705992, size: 11300, gdp: 2080000000 },
+            { name: "Georgia", iso2: "ge", population: 3744605, size: 69700, gdp: 29630000000 },
+            { name: "Germany", iso2: "de", population: 83294633, size: 357022, gdp: 4072000000000 },
+            { name: "Ghana", iso2: "gh", population: 33475870, size: 238533, gdp: 73670000000 },
+            { name: "Greece", iso2: "gr", population: 10384792, size: 131957, gdp: 221700000000 },
+            { name: "Grenada", iso2: "gd", population: 125438, size: 344, gdp: 1280000000 },
+            { name: "Guatemala", iso2: "gt", population: 17357876, size: 108889, gdp: 95000000000 },
+            { name: "Guinea", iso2: "gn", population: 13865691, size: 245857, gdp: 20490000000 },
+            { name: "Guinea-Bissau", iso2: "gw", population: 2105566, size: 36125, gdp: 2000000000 },
+            { name: "Guyana", iso2: "gy", population: 808792, size: 214969, gdp: 15360000000 },
+            { name: "Haiti", iso2: "ht", population: 11546736, size: 27750, gdp: 12900000000 },
+            { name: "Honduras", iso2: "hn", population: 10221247, size: 112492, gdp: 31730000000 },
+            { name: "Hungary", iso2: "hu", population: 9967308, size: 93028, gdp: 181700000000 },
+            { name: "Iceland", iso2: "is", population: 376000, size: 103000, gdp: 28020000000 },
+            { name: "India", iso2: "in", population: 1417173173, size: 3287590, gdp: 3386000000000 },
+            { name: "Indonesia", iso2: "id", population: 275501339, size: 1904569, gdp: 1319000000000 },
+            { name: "Iran", iso2: "ir", population: 88550570, size: 1648195, gdp: 368100000000 },
+            { name: "Iraq", iso2: "iq", population: 44496122, size: 438317, gdp: 264100000000 },
+            { name: "Ireland", iso2: "ie", population: 5011500, size: 70273, gdp: 529400000000 },
+            { name: "Israel", iso2: "il", population: 9038300, size: 22072, gdp: 522000000000 },
+            { name: "Italy", iso2: "it", population: 58870762, size: 301340, gdp: 2010000000000 },
+            { name: "Jamaica", iso2: "jm", population: 2825547, size: 10991, gdp: 17100000000 },
+            { name: "Japan", iso2: "jp", population: 123951692, size: 377975, gdp: 4231000000000 },
+            { name: "Jordan", iso2: "jo", population: 11285869, size: 89342, gdp: 47450000000 },
+            { name: "Kazakhstan", iso2: "kz", population: 19623894, size: 2724900, gdp: 220500000000 },
+            { name: "Kenya", iso2: "ke", population: 54027487, size: 580367, gdp: 113400000000 },
+            { name: "Kiribati", iso2: "ki", population: 131232, size: 811, gdp: 250000000 },
+            { name: "Kuwait", iso2: "kw", population: 4268873, size: 17818, gdp: 176900000000 },
+            { name: "Kyrgyzstan", iso2: "kg", population: 6630623, size: 199951, gdp: 13580000000 },
+            { name: "Laos", iso2: "la", population: 7529475, size: 236800, gdp: 15320000000 },
+            { name: "Latvia", iso2: "lv", population: 1850651, size: 64589, gdp: 44360000000 },
+            { name: "Lebanon", iso2: "lb", population: 5489739, size: 10452, gdp: 24700000000 },
+            { name: "Lesotho", iso2: "ls", population: 2305825, size: 30355, gdp: 2700000000 },
+            { name: "Liberia", iso2: "lr", population: 5302677, size: 111369, gdp: 3950000000 },
+            { name: "Libya", iso2: "ly", population: 6812341, size: 1759540, gdp: 45750000000 },
+            { name: "Liechtenstein", iso2: "li", population: 39327, size: 160, gdp: 7200000000 },
+            { name: "Lithuania", iso2: "lt", population: 2717983, size: 65300, gdp: 78560000000 },
+            { name: "Luxembourg", iso2: "lu", population: 647599, size: 2586, gdp: 86450000000 },
+            { name: "Madagascar", iso2: "mg", population: 29611719, size: 587041, gdp: 14750000000 },
+            { name: "Malawi", iso2: "mw", population: 20405317, size: 118484, gdp: 13100000000 },
+            { name: "Malaysia", iso2: "my", population: 33938240, size: 330803, gdp: 406300000000 },
+            { name: "Maldives", iso2: "mv", population: 523787, size: 298, gdp: 6720000000 },
+            { name: "Mali", iso2: "ml", population: 22594057, size: 1240192, gdp: 19930000000 },
+            { name: "Malta", iso2: "mt", population: 535064, size: 316, gdp: 18000000000 },
+            { name: "Marshall Islands", iso2: "mh", population: 59640, size: 181, gdp: 280000000 },
+            { name: "Mauritania", iso2: "mr", population: 4736132, size: 1030700, gdp: 10370000000 },
+            { name: "Mauritius", iso2: "mu", population: 1299469, size: 2040, gdp: 12900000000 },
+            { name: "Mexico", iso2: "mx", population: 127504125, size: 1964375, gdp: 1470000000000 },
+            { name: "Micronesia", iso2: "fm", population: 114164, size: 702, gdp: 420000000 },
+            { name: "Moldova", iso2: "md", population: 2617820, size: 33846, gdp: 14200000000 },
+            { name: "Monaco", iso2: "mc", population: 36469, size: 2, gdp: 8600000000 },
+            { name: "Mongolia", iso2: "mn", population: 3398366, size: 1564116, gdp: 19440000000 },
+            { name: "Montenegro", iso2: "me", population: 620000, size: 13812, gdp: 6730000000 },
+            { name: "Morocco", iso2: "ma", population: 37457971, size: 710850, gdp: 142800000000 },
+            { name: "Mozambique", iso2: "mz", population: 32969517, size: 799380, gdp: 19550000000 },
+            { name: "Myanmar", iso2: "mm", population: 54179306, size: 676578, gdp: 60160000000 },
+            { name: "Namibia", iso2: "na", population: 2567012, size: 825615, gdp: 12910000000 },
+            { name: "Nauru", iso2: "nr", population: 12668, size: 21, gdp: 130000000 },
+            { name: "Nepal", iso2: "np", population: 30547580, size: 147516, gdp: 40830000000 },
+            { name: "Netherlands", iso2: "nl", population: 17700000, size: 41850, gdp: 1094000000000 },
+            { name: "New Zealand", iso2: "nz", population: 5122600, size: 268021, gdp: 243400000000 },
+            { name: "Nicaragua", iso2: "ni", population: 6948392, size: 130373, gdp: 17530000000 },
+            { name: "Niger", iso2: "ne", population: 26207977, size: 1267000, gdp: 16750000000 },
+            { name: "Nigeria", iso2: "ng", population: 218541212, size: 923768, gdp: 477400000000 },
+            { name: "North Korea", iso2: "kp", population: 26069000, size: 120540, gdp: 30000000000 },
+            { name: "North Macedonia", iso2: "mk", population: 2093551, size: 25713, gdp: 13740000000 },
+            { name: "Norway", iso2: "no", population: 5491866, size: 385207, gdp: 551900000000 },
+            { name: "Oman", iso2: "om", population: 4520471, size: 309500, gdp: 114700000000 },
+            { name: "Pakistan", iso2: "pk", population: 235824862, size: 881912, gdp: 376500000000 },
+            { name: "Palau", iso2: "pw", population: 18023, size: 459, gdp: 260000000 },
+            { name: "Palestine", iso2: "ps", population: 5354924, size: 6220, gdp: 19100000000 },
+            { name: "Panama", iso2: "pa", population: 4408581, size: 75417, gdp: 80190000000 },
+            { name: "Papua New Guinea", iso2: "pg", population: 10142600, size: 462840, gdp: 30730000000 },
+            { name: "Paraguay", iso2: "py", population: 6780744, size: 406752, gdp: 43300000000 },
+            { name: "Peru", iso2: "pe", population: 34049588, size: 1285216, gdp: 240000000000 },
+            { name: "Philippines", iso2: "ph", population: 115559009, size: 300000, gdp: 404300000000 },
+            { name: "Poland", iso2: "pl", population: 37950000, size: 312696, gdp: 842100000000 },
+            { name: "Portugal", iso2: "pt", population: 10270865, size: 92212, gdp: 267600000000 },
+            { name: "Qatar", iso2: "qa", population: 2695119, size: 11586, gdp: 236200000000 },
+            { name: "Romania", iso2: "ro", population: 19053815, size: 238397, gdp: 348900000000 },
+            { name: "Russia", iso2: "ru", population: 144713300, size: 17098246, gdp: 2244000000000 },
+            { name: "Rwanda", iso2: "rw", population: 13776698, size: 26338, gdp: 13580000000 },
+            { name: "Saint Kitts and Nevis", iso2: "kn", population: 47606, size: 261, gdp: 900000000 },
+            { name: "Saint Lucia", iso2: "lc", population: 185000, size: 616, gdp: 2470000000 },
+            { name: "Saint Vincent and the Grenadines", iso2: "vc", population: 103948, size: 389, gdp: 1030000000 },
+            { name: "Samoa", iso2: "ws", population: 222382, size: 2842, gdp: 920000000 },
+            { name: "San Marino", iso2: "sm", population: 33660, size: 61, gdp: 1850000000 },
+            { name: "Sao Tome and Principe", iso2: "st", population: 227380, size: 964, gdp: 600000000 },
+            { name: "Saudi Arabia", iso2: "sa", population: 36408820, size: 2149690, gdp: 1060000000000 },
+            { name: "Senegal", iso2: "sn", population: 17365000, size: 196712, gdp: 29110000000 },
+            { name: "Serbia", iso2: "rs", population: 7149077, size: 88361, gdp: 72930000000 },
+            { name: "Seychelles", iso2: "sc", population: 107000, size: 452, gdp: 2330000000 },
+            { name: "Sierra Leone", iso2: "sl", population: 8420641, size: 71740, gdp: 4010000000 },
+            { name: "Singapore", iso2: "sg", population: 5637000, size: 719, gdp: 466800000000 },
+            { name: "Slovakia", iso2: "sk", population: 5447721, size: 49035, gdp: 121000000000 },
+            { name: "Slovenia", iso2: "si", population: 2119091, size: 20273, gdp: 67100000000 },
+            { name: "Solomon Islands", iso2: "sb", population: 724273, size: 28400, gdp: 1610000000 },
+            { name: "Somalia", iso2: "so", population: 17066000, size: 637657, gdp: 10240000000 },
+            { name: "South Africa", iso2: "za", population: 59392255, size: 1221037, gdp: 405800000000 },
+            { name: "South Korea", iso2: "kr", population: 51740000, size: 100210, gdp: 1712000000000 },
+            { name: "South Sudan", iso2: "ss", population: 10975618, size: 644329, gdp: 4930000000 },
+            { name: "Spain", iso2: "es", population: 47551000, size: 505990, gdp: 1400000000000 },
+            { name: "Sri Lanka", iso2: "lk", population: 21803000, size: 65610, gdp: 74800000000 },
+            { name: "Sudan", iso2: "sd", population: 46837549, size: 1886068, gdp: 42680000000 },
+            { name: "Suriname", iso2: "sr", population: 612985, size: 163820, gdp: 3950000000 },
+            { name: "Sweden", iso2: "se", population: 10452326, size: 450295, gdp: 591600000000 },
+            { name: "Switzerland", iso2: "ch", population: 8740472, size: 41285, gdp: 807200000000 },
+            { name: "Syria", iso2: "sy", population: 22125249, size: 185180, gdp: 20000000000 },
+            { name: "Tajikistan", iso2: "tj", population: 9957464, size: 143100, gdp: 11110000000 },
+            { name: "Tanzania", iso2: "tz", population: 65497748, size: 945087, gdp: 75780000000 },
+            { name: "Thailand", iso2: "th", population: 71790442, size: 513120, gdp: 495400000000 },
+            { name: "Timor-Leste", iso2: "tl", population: 1341296, size: 14874, gdp: 2150000000 },
+            { name: "Togo", iso2: "tg", population: 8848699, size: 56785, gdp: 9020000000 },
+            { name: "Tonga", iso2: "to", population: 106017, size: 747, gdp: 520000000 },
+            { name: "Trinidad and Tobago", iso2: "tt", population: 1534937, size: 5131, gdp: 24700000000 },
+            { name: "Tunisia", iso2: "tn", population: 12046656, size: 163610, gdp: 46680000000 },
+            { name: "Turkey", iso2: "tr", population: 85341241, size: 783562, gdp: 1154000000000 },
+            { name: "Turkmenistan", iso2: "tm", population: 6430770, size: 488100, gdp: 62510000000 },
+            { name: "Tuvalu", iso2: "tv", population: 11312, size: 26, gdp: 60000000 },
+            { name: "Uganda", iso2: "ug", population: 47249585, size: 241550, gdp: 46370000000 },
+            { name: "Ukraine", iso2: "ua", population: 39700000, size: 603500, gdp: 151500000000 },
+            { name: "United Arab Emirates", iso2: "ae", population: 9441129, size: 83600, gdp: 509200000000 },
+            { name: "United Kingdom", iso2: "gb", population: 67026292, size: 242495, gdp: 3071000000000 },
+            { name: "United States", iso2: "us", population: 333287557, size: 9833520, gdp: 25463000000000 },
+            { name: "Uruguay", iso2: "uy", population: 3422794, size: 176215, gdp: 71190000000 },
+            { name: "Uzbekistan", iso2: "uz", population: 34627602, size: 447400, gdp: 90390000000 },
+            { name: "Vanuatu", iso2: "vu", population: 326740, size: 12189, gdp: 1130000000 },
+            { name: "Vatican City", iso2: "va", population: 825, size: 0.44, gdp: 315000000 },
+            { name: "Venezuela", iso2: "ve", population: 28301696, size: 916445, gdp: 48240000000 },
+            { name: "Vietnam", iso2: "vn", population: 98186856, size: 331212, gdp: 413800000000 },
+            { name: "Yemen", iso2: "ye", population: 33696614, size: 527968, gdp: 20900000000 },
+            { name: "Zambia", iso2: "zm", population: 19610178, size: 752618, gdp: 29840000000 },
+            { name: "Zimbabwe", iso2: "zw", population: 16320537, size: 390757, gdp: 28380000000 }
+        ];
+
+        let score = 0;
+        let streak = 0;
+        let countryOne, countryTwo;
+        let gameOver = false;
+        let gameMode = 'population';
+        let difficulty = 'random';
+        let countriesForGame = [];
+
+        const savedDataKey = 'higherLowerGameData';
+        let persistentData = {
+            coins: 0,
+            lives: 3,
+            lifelines: {
+                pass: 0,
+                swap: 0,
+                hint: 0
+            }
+        };
+
+        // UI Element IDs
+        const appContainer = document.getElementById('app-container');
+        const homePage = document.getElementById('home-page');
+        const gameSelectPage = document.getElementById('game-select-page');
+        const gamePage = document.getElementById('game-page');
+        const factsPage = document.getElementById('facts-page');
+        const rulesPage = document.getElementById('rules-page');
+        const scoreDisplay = document.getElementById('score-display');
+        const streakDisplay = document.getElementById('streak-display');
+        const livesDisplay = document.getElementById('lives-display');
+        const coinsDisplay = document.getElementById('coins-display');
+        const flagOneImg = document.getElementById('flag-one');
+        const flagTwoImg = document.getElementById('flag-two');
+        const flagNameOne = document.getElementById('flag-name-one');
+        const flagNameTwo = document.getElementById('flag-name-two');
+        const statOne = document.getElementById('stat-one');
+        const statTwoLabel = document.getElementById('stat-two-label');
+        const higherBtn = document.getElementById('higher-btn');
+        const lowerBtn = document.getElementById('lower-btn');
+        const messageDisplay = document.getElementById('message');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const shopBtn = document.getElementById('shop-btn');
+        const shopModal = document.getElementById('shop-modal');
+        const closeShopBtn = document.getElementById('close-shop-btn');
+        const modalCoinsDisplay = document.getElementById('modal-coins-display');
+        const buyPassBtn = document.getElementById('buy-pass-btn');
+        const buySwapBtn = document.getElementById('buy-swap-btn');
+        const buyHintBtn = document.getElementById('buy-hint-btn');
+        const buyLifeBtn = document.getElementById('buy-life-btn');
+        const usePassBtn = document.getElementById('use-pass-btn');
+        const useSwapBtn = document.getElementById('use-swap-btn');
+        const useHintBtn = document.getElementById('use-hint-btn');
+        const shopMessage = document.getElementById('shop-message');
+        const playBtn = document.getElementById('play-btn');
+        const factsBtn = document.getElementById('facts-btn');
+        const rulesBtn = document.getElementById('rules-btn');
+        const backFromGameBtn = document.getElementById('back-to-home-from-game-btn');
+        const backFromFactsBtn = document.getElementById('back-from-facts-btn');
+        const backFromRulesBtn = document.getElementById('back-from-rules-btn');
+        const replayBtn = document.getElementById('replay-btn');
+        const backToHomeFromGameOverBtn = document.getElementById('back-to-home-from-game-over-btn');
+        const shareScoreBtn = document.getElementById('share-score-btn');
+        const factsTableBody = document.querySelector('#facts-table tbody');
+        const factsTableHeaders = document.querySelectorAll('#facts-table th');
+
+        const showPage = (pageId) => {
+            const pages = [homePage, gameSelectPage, gamePage, factsPage, rulesPage];
+            pages.forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.remove('hidden');
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
+        };
+
+        const saveGame = () => {
+            localStorage.setItem(savedDataKey, JSON.stringify(persistentData));
+        };
+
+        const loadGame = () => {
+            try {
+                const savedData = localStorage.getItem(savedDataKey);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    persistentData.coins = data.coins || 0;
+                    persistentData.lives = data.lives || 3;
+                    persistentData.lifelines.pass = data.lifelines.pass || 0;
+                    persistentData.lifelines.swap = data.lifelines.swap || 0;
+                    persistentData.lifelines.hint = data.lifelines.hint || 0;
+                }
+            } catch (e) {
+                console.error("Failed to load game data from localStorage", e);
+            }
+        };
+
+        const updateUI = () => {
+            livesDisplay.textContent = `Lives: ${persistentData.lives}`;
+            coinsDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>${persistentData.coins}`;
+            usePassBtn.querySelector('span').textContent = `(${persistentData.lifelines.pass})`;
+            useSwapBtn.querySelector('span').textContent = `(${persistentData.lifelines.swap})`;
+            useHintBtn.querySelector('span').textContent = `(${persistentData.lifelines.hint})`;
+            modalCoinsDisplay.textContent = persistentData.coins;
+        };
+        
+        const formatNumber = (num, mode) => {
+            if (num === 0) return 'Unknown';
+            const formatter = new Intl.NumberFormat('en-US', {
+                notation: 'compact',
+                compactDisplay: 'short'
+            });
+            let suffix = '';
+            switch(mode) {
+                case 'population':
+                    suffix = '';
+                    break;
+                case 'size':
+                    suffix = ' km²';
+                    break;
+                case 'gdp':
+                    suffix = ' USD';
+                    break;
+            }
+            return formatter.format(num) + suffix;
+        };
+
+        const getRandomCountry = () => {
+            return countriesForGame[Math.floor(Math.random() * countriesForGame.length)];
+        };
+
+        const newRound = () => {
+            if (gameOver) return;
+
+            countryOne = countryTwo || getRandomCountry();
+            countryTwo = getRandomCountry();
+            while (countryTwo.name === countryOne.name) {
+                countryTwo = getRandomCountry();
+            }
+
+            flagOneImg.src = `https://flagcdn.com/w160/${countryOne.iso2}.png`;
+            flagOneImg.alt = `${countryOne.name} flag`;
+            flagNameOne.textContent = countryOne.name;
+            statOne.textContent = `${gameMode.charAt(0).toUpperCase() + gameMode.slice(1)}: ${formatNumber(countryOne[gameMode], gameMode)}`;
+            document.getElementById('card-one').classList.add('fade-in');
+
+            flagTwoImg.src = `https://flagcdn.com/w160/${countryTwo.iso2}.png`;
+            flagTwoImg.alt = `${countryTwo.name} flag`;
+            flagNameTwo.textContent = countryTwo.name;
+            statTwoLabel.textContent = `Higher or Lower?`;
+            document.getElementById('card-two').classList.add('fade-in');
+
+            streakDisplay.textContent = `Streak: ${streak}`;
+            messageDisplay.textContent = '';
+            messageDisplay.className = 'result-message';
+        };
+
+        const checkGuess = (guess) => {
+            if (gameOver) return;
+            
+            const isHigher = countryTwo[gameMode] > countryOne[gameMode];
+            const isCorrect = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
+
+            if (isCorrect) {
+                score++;
+                persistentData.coins++;
+                streak++;
+                let bonusMessage = '';
+                if (streak >= 5 && streak % 5 === 0) {
+                    persistentData.coins += 10;
+                    bonusMessage += ` (+10 coins for a streak of ${streak}!)`;
+                } else if (streak >= 3 && streak % 3 === 0) {
+                    persistentData.coins += 5;
+                    bonusMessage += ` (+5 coins for a streak of ${streak}!)`;
+                }
+                messageDisplay.textContent = `Correct! ${countryTwo.name} has a ${gameMode} of ${formatNumber(countryTwo[gameMode], gameMode)}.${bonusMessage}`;
+                messageDisplay.classList.add('correct');
+            } else {
+                persistentData.lives--;
+                streak = 0;
+                messageDisplay.textContent = `Wrong! ${countryTwo.name} has a ${gameMode} of ${formatNumber(countryTwo[gameMode], gameMode)}.`;
+                messageDisplay.classList.add('incorrect');
+                document.getElementById('card-two').classList.add('shake');
+            }
+            saveGame();
+            updateUI();
+            scoreDisplay.textContent = `Score: ${score}`;
+            streakDisplay.textContent = `Streak: ${streak}`;
+
+            if (persistentData.lives <= 0) {
+                endGame();
+            } else {
+                setTimeout(() => {
+                    document.getElementById('card-one').classList.remove('fade-in');
+                    document.getElementById('card-two').classList.remove('fade-in', 'shake');
+                    newRound();
+                }, 2000);
+            }
+        };
+
+        const endGame = () => {
+            gameOver = true;
+            document.getElementById('cards-container').classList.add('hidden');
+            document.getElementById('buttons-container').classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = `Final Score: ${score}`;
+        };
+
+        const startGame = (mode, level) => {
+            gameMode = mode;
+            difficulty = level;
+            score = 0;
+            streak = 0;
+            gameOver = false;
+            loadGame();
+
+            if (difficulty === 'easy') {
+                const sorted = [...countries].sort((a, b) => b[gameMode] - a[gameMode]);
+                countriesForGame = sorted.slice(0, Math.floor(sorted.length * 0.2));
+            } else if (difficulty === 'medium') {
+                const sorted = [...countries].sort((a, b) => b[gameMode] - a[gameMode]);
+                const midStart = Math.floor(sorted.length * 0.2);
+                const midEnd = Math.floor(sorted.length * 0.8);
+                countriesForGame = sorted.slice(midStart, midEnd);
+            } else if (difficulty === 'hard') {
+                const sorted = [...countries].sort((a, b) => b[gameMode] - a[gameMode]);
+                countriesForGame = sorted.slice(Math.floor(sorted.length * 0.8), sorted.length);
+            } else {
+                countriesForGame = countries;
+            }
+
+            if (countriesForGame.length < 2) {
+                messageDisplay.textContent = 'Not enough countries for this difficulty level. Please choose another.';
+                showPage('game-select-page');
+                return;
+            }
+
+            updateUI();
+            showPage('game-page');
+            document.getElementById('cards-container').classList.remove('hidden');
+            document.getElementById('buttons-container').classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            newRound();
+        };
+
+        const openShop = () => {
+            shopModal.classList.remove('hidden');
+            modalCoinsDisplay.textContent = persistentData.coins;
+            shopMessage.textContent = '';
+        };
+
+        const closeShop = () => {
+            shopModal.classList.add('hidden');
+        };
+
+        const purchaseItem = (cost, itemType) => {
+            if (persistentData.coins >= cost) {
+                if (itemType === 'life' && persistentData.lives >= 10) {
+                    shopMessage.textContent = "You can't have more than 10 lives!";
+                    return;
+                }
+                if (itemType !== 'life' && persistentData.lifelines[itemType] >= 10) {
+                    shopMessage.textContent = "You can't have more than 10 of this lifeline!";
+                    return;
+                }
+
+                persistentData.coins -= cost;
+                
+                if (itemType === 'life') {
+                    persistentData.lives++;
+                } else {
+                    persistentData.lifelines[itemType]++;
+                }
+                
+                saveGame();
+                updateUI();
+                closeShop();
+            } else {
+                shopMessage.textContent = "Not enough coins!";
+            }
+        };
+
+        const useLifeline = (itemType) => {
+            if (persistentData.lifelines[itemType] > 0) {
+                persistentData.lifelines[itemType]--;
+                saveGame();
+                updateUI();
+                messageDisplay.classList.remove('incorrect', 'correct');
+                
+                if (itemType === 'pass') {
+                    const nextCountry = getRandomCountry();
+                    while (nextCountry.name === countryOne.name || nextCountry.name === countryTwo.name) {
+                        nextCountry = getRandomCountry();
+                    }
+                    countryTwo = nextCountry;
+                    flagTwoImg.src = `https://flagcdn.com/w160/${countryTwo.iso2}.png`;
+                    flagTwoImg.alt = `${countryTwo.name} flag`;
+                    flagNameTwo.textContent = nextCountry.name;
+                    messageDisplay.textContent = "Second country has been switched!";
+                } else if (itemType === 'swap') {
+                    const temp = countryOne;
+                    countryOne = countryTwo;
+                    countryTwo = temp;
+                    flagOneImg.src = `https://flagcdn.com/w160/${countryOne.iso2}.png`;
+                    flagOneImg.alt = `${countryOne.name} flag`;
+                    flagNameOne.textContent = countryOne.name;
+                    statOne.textContent = `${gameMode.charAt(0).toUpperCase() + gameMode.slice(1)}: ${formatNumber(countryOne[gameMode], gameMode)}`;
+                    messageDisplay.textContent = "Countries have been swapped!";
+                } else if (itemType === 'hint') {
+                    const popOne = countryOne[gameMode];
+                    const popTwo = countryTwo[gameMode];
+                    const hintMessage = popTwo > popOne ? `Hint: The answer is Higher.` : `Hint: The answer is Lower.`;
+                    messageDisplay.textContent = hintMessage;
+                }
+            } else {
+                messageDisplay.textContent = `You don't have a '${itemType}' lifeline!`;
+            }
+        };
+        
+        const renderFactsTable = (sortBy = 'population') => {
+            let sortedCountries = [...countries].sort((a, b) => b[sortBy] - a[sortBy]);
+            
+            factsTableBody.innerHTML = '';
+            sortedCountries.forEach(country => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="flex items-center gap-2"><img src="https://flagcdn.com/w20/${country.iso2}.png" alt="${country.name} flag">${country.name}</td>
+                    <td>${formatNumber(country.population, 'population')}</td>
+                    <td>${formatNumber(country.size, 'size')}</td>
+                    <td>${formatNumber(country.gdp, 'gdp')}</td>
+                `;
+                factsTableBody.appendChild(row);
+            });
+
+            factsTableHeaders.forEach(th => {
+                const arrow = th.querySelector('.sort-arrow');
+                arrow.textContent = '';
+                if (th.id === `sort-${sortBy}`) {
+                    arrow.textContent = '▲';
+                }
+            });
+        };
+
+        playBtn.addEventListener('click', () => showPage('game-select-page'));
+        factsBtn.addEventListener('click', () => { showPage('facts-page'); renderFactsTable(); });
+        rulesBtn.addEventListener('click', () => showPage('rules-page'));
+        backFromGameBtn.addEventListener('click', () => showPage('home-page'));
+        backFromFactsBtn.addEventListener('click', () => showPage('home-page'));
+        backFromRulesBtn.addEventListener('click', () => showPage('home-page'));
+        
+        document.querySelectorAll('.game-mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.game-mode-btn').forEach(b => b.classList.remove('bg-yellow-500'));
+                e.target.classList.add('bg-yellow-500');
+                gameMode = e.target.dataset.mode;
+                checkReadyToStart();
+            });
+        });
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('bg-yellow-500'));
+                e.target.classList.add('bg-yellow-500');
+                difficulty = e.target.dataset.difficulty;
+                checkReadyToStart();
+            });
+        });
+
+        const checkReadyToStart = () => {
+            const selectedMode = document.querySelector('.game-mode-btn.bg-yellow-500');
+            const selectedDifficulty = document.querySelector('.difficulty-btn.bg-yellow-500');
+            if (selectedMode && selectedDifficulty) {
+                startGame(selectedMode.dataset.mode, selectedDifficulty.dataset.difficulty);
+            }
+        };
+
+        higherBtn.addEventListener('click', () => checkGuess('higher'));
+        lowerBtn.addEventListener('click', () => checkGuess('lower'));
+        
+        replayBtn.addEventListener('click', () => {
+            startGame(gameMode, difficulty);
+        });
+
+        backToHomeFromGameOverBtn.addEventListener('click', () => {
+            showPage('home-page');
+        });
+
+        shareScoreBtn.addEventListener('click', () => {
+            const shareText = `I scored ${score} in Higher or Lower: Countries! Think you can beat me?`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Higher or Lower Score',
+                    text: shareText
+                }).catch(error => console.error('Error sharing:', error));
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    messageDisplay.textContent = 'Score copied to clipboard!';
+                    setTimeout(() => {
+                        messageDisplay.textContent = '';
+                    }, 2000);
+                }).catch(err => {
+                    messageDisplay.textContent = 'Failed to copy score.';
+                    setTimeout(() => {
+                        messageDisplay.textContent = '';
+                    }, 2000);
+                });
+            }
+        });
+        
+        shopBtn.addEventListener('click', openShop);
+        closeShopBtn.addEventListener('click', closeShop);
+        
+        buyPassBtn.addEventListener('click', () => purchaseItem(20, 'pass'));
+        buySwapBtn.addEventListener('click', () => purchaseItem(20, 'swap'));
+        buyHintBtn.addEventListener('click', () => purchaseItem(5, 'hint'));
+        buyLifeBtn.addEventListener('click', () => purchaseItem(50, 'life'));
+
+        usePassBtn.addEventListener('click', () => useLifeline('pass'));
+        useSwapBtn.addEventListener('click', () => useLifeline('swap'));
+        useHintBtn.addEventListener('click', () => useLifeline('hint'));
+        
+        factsTableHeaders.forEach(th => {
+            th.addEventListener('click', () => {
+                const sortBy = th.id.replace('sort-', '');
+                renderFactsTable(sortBy);
+            });
+        });
+
+        window.onload = () => {
+            loadGame();
+            updateUI();
+            showPage('home-page');
+        };
+    </script>
+</body>
+</html>
