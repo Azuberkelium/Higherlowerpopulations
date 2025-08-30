@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higher or Lower Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .container {
+            background-color: #2e2a44;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 48rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .card {
+            background-color: #3b3058;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card img {
+            width: 100%;
+            max-width: 15rem;
+            height: auto;
+            border-radius: 0.5rem;
+            border: 2px solid #5d5d81;
+        }
+        .flag-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #c9c1f2;
+            text-align: center;
+        }
+        .population-text {
+            font-size: 1.125rem;
+            color: #a0a0c0;
+            text-align: center;
+        }
+        .vs-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #7d7d9e;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn {
+            background-color: #6a4c93;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #7b5da6;
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .game-info-line {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 1rem;
+        }
+        .result-message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            text-align: center;
+            min-height: 2.5rem;
+        }
+        .correct {
+            color: #4ade80;
+        }
+        .incorrect {
+            color: #ef4444;
+        }
+        .game-over-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+        }
+        .game-over-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fca5a5;
+        }
+        .final-score {
+            font-size: 1.5rem;
+            color: #fca5a5;
+        }
+        .hidden {
+            display: none;
+        }
+        #coins-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffde54;
+        }
+        .shop-modal {
+            background-color: #3b3058;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 28rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 90;
+        }
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .shop-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #4b3e6a;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .shop-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .item-cost {
+            font-size: 0.875rem;
+            color: #ffde54;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        .homepage-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 20rem;
+        }
+        .homepage-buttons .btn {
+            width: 100%;
+        }
+        .game-selection-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .game-selection-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .difficulty-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .difficulty-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        .facts-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .facts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+        .facts-table th, .facts-table td {
+            border: 1px solid #4b3e6a;
+            padding: 0.75rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .facts-table th {
+            background-color: #3b3058;
+            cursor: pointer;
+        }
+        .facts-table tbody tr:nth-child(even) {
+            background-color: #2e2a44;
+        }
+        .facts-table tbody tr:nth-child(odd) {
+            background-color: #3b3058;
+        }
+        .facts-table td img {
+            height: 1.5rem;
+            width: auto;
+        }
+        .facts-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sort-arrow {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen">
+    <div id="app-container" class="container">
+        <!-- Home Page -->
+        <div id="home-page">
+            <h1 class="text-4xl font-bold text-center text-purple-300">Higher or Lower</h1>
+            <p class="text-center text-lg mt-2">Compare countries by their stats! Get coins, buy lifelines, and climb the leaderboard.</p>
+            <div class="homepage-buttons mt-8">
+                <button id="play-btn" class="btn">Play</button>
+                <button id="facts-btn" class="btn">See Facts</button>
+                <button id="rules-btn" class="btn">Rules</button>
+            </div>
+        </div>
+
+        <!-- Game Selection Page -->
+        <div id="game-select-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-purple-300">Choose a Game</h2>
+            <div class="game-selection-grid mt-4">
+                <button class="btn game-mode-btn" data-mode="population">Population</button>
+                <button class="btn game-mode-btn" data-mode="size">Size</button>
+                <button class="btn game-mode-btn" data-mode="gdp">GDP</button>
+            </div>
+            <h3 class="text-2xl font-bold text-center text-purple-300 mt-6">Select Difficulty</h3>
+            <div class="difficulty-buttons mt-4">
+                <button class="btn difficulty-btn" data-difficulty="easy">Easy</button>
+                <button class="btn difficulty-btn" data-difficulty="medium">Medium</button>
+                <button class="btn difficulty-btn" data-difficulty="hard">Hard</button>
+                <button class="btn difficulty-btn" data-difficulty="random">Random</button>
+            </div>
+            <button id="back-to-home-btn" class="btn mt-4">Back</button>
+        </div>
+
+        <!-- Game Page -->
+        <div id="game-page" class="hidden">
+            <div class="w-full flex justify-between items-center mb-4">
+                <button id="back-to-home-from-game-btn" class="btn">Back</button>
+                <button id="shop-btn" class="btn">Shop</button>
+            </div>
+            <div class="game-info-line">
+                <span id="score-display">Score: 0</span>
+                <span id="streak-display">Streak: 0</span>
+                <span id="lives-display">Lives: 3</span>
+            </div>
+            <div class="game-info-line">
+                <span id="coins-display"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>0</span>
+            </div>
+
+            <div id="cards-container" class="w-full flex flex-col items-center gap-4 md:flex-row md:justify-center">
+                <div id="card-one" class="card fade-in">
+                    <p id="flag-name-one" class="flag-name">Country One</p>
+                    <img id="flag-one" src="" alt="Country Flag">
+                    <p id="stat-one" class="population-text">Population: Calculating...</p>
+                </div>
+                
+                <p class="vs-text">VS</p>
+
+                <div id="card-two" class="card fade-in">
+                    <p id="flag-name-two" class="flag-name">Country Two</p>
+                    <img id="flag-two" src="" alt="Country Flag">
+                    <p class="population-text" id="stat-two-label">Higher or Lower?</p>
+                </div>
+            </div>
+
+            <div id="buttons-container" class="buttons-container">
+                <button id="higher-btn" class="btn">Higher</button>
+                <button id="lower-btn" class="btn">Lower</button>
+            </div>
+            
+            <p id="message" class="result-message"></p>
+
+            <div id="game-over-screen" class="game-over-container hidden">
+                <h2 class="game-over-title">Game Over!</h2>
+                <p id="final-score" class="final-score"></p>
+                <button id="restart-btn" class="btn">Play Again</button>
+            </div>
+        </div>
+        
+        <!-- Shop Modal -->
+        <div id="shop-modal" class="hidden modal-overlay">
+            <div class="shop-modal">
+                <button id="close-shop-btn" class="modal-close-btn">&times;</button>
+                <h3 class="text-2xl font-bold text-center text-purple-300 mb-4">Shop</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-lg">Your Coins:</p>
+                    <p id="modal-coins-display" class="text-lg font-bold text-yellow-300">0</p>
+                </div>
+                <div class="shop-items">
+                    <button id="pass-btn" class="shop-item">
+                        <span>Pass</span>
+                        <span id="pass-count"></span>
+                        <span class="item-cost">20 coins</span>
+                    </button>
+                    <button id="swap-btn" class="shop-item">
+                        <span>Swap</span>
+                        <span id="swap-count"></span>
+                        <span class="item-cost">20 coins</span>
+                    </button>
+                    <button id="hint-btn" class="shop-item">
+                        <span>Hint</span>
+                        <span id="hint-count"></span>
+                        <span class="item-cost">20 coins</span>
+                    </button>
+                    <button id="life-btn" class="shop-item">
+                        <span>Extra Life</span>
+                        <span id="life-count"></span>
+                        <span class="item-cost">50 coins</span>
+                    </button>
+                </div>
+                <p id="shop-message" class="text-center text-sm mt-4 text-red-400"></p>
+            </div>
+        </div>
+
+        <!-- Facts Page -->
+        <div id="facts-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-purple-300">Country Facts</h2>
+            <div class="facts-table-container">
+                <table id="facts-table" class="facts-table">
+                    <thead>
+                        <tr>
+                            <th id="sort-country" class="facts-header">Country <span class="sort-arrow"></span></th>
+                            <th id="sort-population" class="facts-header">Population <span class="sort-arrow">▲</span></th>
+                            <th id="sort-size" class="facts-header">Size (km²) <span class="sort-arrow"></span></th>
+                            <th id="sort-gdp" class="facts-header">GDP ($) <span class="sort-arrow"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <button id="back-from-facts-btn" class="btn mt-4">Back</button>
+        </div>
+
+        <!-- Rules Page -->
+        <div id="rules-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-purple-300">Rules</h2>
+            <div class="text-lg mt-4 text-center">
+                <p>You will be shown a country and its first fact (population, size, or GDP).</p>
+                <p>A second country will appear. You must guess if its stat is **higher** or **lower** than the first country's.</p>
+                <p>Guess correctly to get coins and increase your score. Guess incorrectly and you lose a life.</p>
+                <p>Buy lifelines in the shop to help you when you're stuck!</p>
+            </div>
+            <button id="back-from-rules-btn" class="btn mt-4">Back</button>
+        </div>
+    </div>
+    <script>
+        const countries = [
+            { name: "China", population: 1425671352, size: 9596961, gdp: 19374000000000, flag: "https://flagcdn.com/cn.svg" },
+            { name: "India", population: 1417173173, size: 3287590, gdp: 3386000000000, flag: "https://flagcdn.com/in.svg" },
+            { name: "United States", population: 333287557, size: 9833520, gdp: 25463000000000, flag: "https://flagcdn.com/us.svg" },
+            { name: "Indonesia", population: 275501339, size: 1904569, gdp: 1319000000000, flag: "https://flagcdn.com/id.svg" },
+            { name: "Pakistan", population: 235824862, size: 881912, gdp: 376500000000, flag: "https://flagcdn.com/pk.svg" },
+            { name: "Nigeria", population: 218541212, size: 923768, gdp: 477400000000, flag: "https://flagcdn.com/ng.svg" },
+            { name: "Brazil", population: 215313498, size: 8515767, gdp: 1920000000000, flag: "https://flagcdn.com/br.svg" },
+            { name: "Bangladesh", population: 171186372, size: 147570, gdp: 460200000000, flag: "https://flagcdn.com/bd.svg" },
+            { name: "Russia", population: 144713300, size: 17098246, gdp: 2244000000000, flag: "https://flagcdn.com/ru.svg" },
+            { name: "Mexico", population: 127504125, size: 1964375, gdp: 1470000000000, flag: "https://flagcdn.com/mx.svg" },
+            { name: "Japan", population: 123951692, size: 377975, gdp: 4231000000000, flag: "https://flagcdn.com/jp.svg" },
+            { name: "Ethiopia", population: 123379924, size: 1104300, gdp: 126200000000, flag: "https://flagcdn.com/et.svg" },
+            { name: "Philippines", population: 115559009, size: 300000, gdp: 404300000000, flag: "https://flagcdn.com/ph.svg" },
+            { name: "Egypt", population: 110990103, size: 1010408, gdp: 387100000000, flag: "https://flagcdn.com/eg.svg" },
+            { name: "Vietnam", population: 98186856, size: 331212, gdp: 413800000000, flag: "https://flagcdn.com/vn.svg" },
+            { name: "DR Congo", population: 99010212, size: 2344858, gdp: 64720000000, flag: "https://flagcdn.com/cd.svg" },
+            { name: "Turkey", population: 85341241, size: 783562, gdp: 1154000000000, flag: "https://flagcdn.com/tr.svg" },
+            { name: "Germany", population: 83294633, size: 357022, gdp: 4072000000000, flag: "https://flagcdn.com/de.svg" },
+            { name: "Thailand", population: 71790442, size: 513120, gdp: 495400000000, flag: "https://flagcdn.com/th.svg" },
+            { name: "France", population: 64626628, size: 551695, gdp: 2780000000000, flag: "https://flagcdn.com/fr.svg" },
+            { name: "United Kingdom", population: 67026292, size: 242495, gdp: 3071000000000, flag: "https://flagcdn.com/gb.svg" },
+            { name: "Italy", population: 58870762, size: 301340, gdp: 2010000000000, flag: "https://flagcdn.com/it.svg" },
+            { name: "South Africa", population: 59392255, size: 1221037, gdp: 405800000000, flag: "https://flagcdn.com/za.svg" },
+            { name: "Spain", population: 47551000, size: 505990, gdp: 1400000000000, flag: "https://flagcdn.com/es.svg" },
+            { name: "Canada", population: 38246108, size: 9984670, gdp: 2140000000000, flag: "https://flagcdn.com/ca.svg" },
+            { name: "Australia", population: 26068792, size: 7692024, gdp: 1700000000000, flag: "https://flagcdn.com/au.svg" },
+            { name: "Sweden", population: 10452326, size: 450295, gdp: 591600000000, flag: "https://flagcdn.com/se.svg" },
+            { name: "Finland", population: 5540720, size: 338424, gdp: 295000000000, flag: "https://flagcdn.com/fi.svg" },
+            { name: "Norway", population: 5491866, size: 385207, gdp: 551900000000, flag: "https://flagcdn.com/no.svg" },
+            { name: "Denmark", population: 5882260, size: 43094, gdp: 400100000000, flag: "https://flagcdn.com/dk.svg" },
+            { name: "New Zealand", population: 5122600, size: 268021, gdp: 243400000000, flag: "https://flagcdn.com/nz.svg" },
+            { name: "Ireland", population: 5011500, size: 70273, gdp: 529400000000, flag: "https://flagcdn.com/ie.svg" },
+            { name: "Iceland", population: 376000, size: 103000, gdp: 28020000000, flag: "https://flagcdn.com/is.svg" },
+            { name: "Malta", population: 535064, size: 316, gdp: 18000000000, flag: "https://flagcdn.com/mt.svg" },
+            { name: "Monaco", population: 36469, size: 2, gdp: 8600000000, flag: "https://flagcdn.com/mc.svg" },
+            { name: "Vatican City", population: 825, size: 0.44, gdp: 315000000, flag: "https://flagcdn.com/va.svg" }
+        ];
+
+        let score = 0;
+        let streak = 0;
+        let countryOne, countryTwo;
+        let gameOver = false;
+        let gameMode = 'population';
+        let difficulty = 'random';
+        let countriesForGame = [];
+
+        const savedDataKey = 'higherLowerGameData';
+        let persistentData = {
+            coins: 0,
+            lives: 3,
+            lifelines: {
+                pass: 0,
+                swap: 0,
+                hint: 0
+            }
+        };
+
+        // UI Element IDs
+        const appContainer = document.getElementById('app-container');
+        const homePage = document.getElementById('home-page');
+        const gameSelectPage = document.getElementById('game-select-page');
+        const gamePage = document.getElementById('game-page');
+        const factsPage = document.getElementById('facts-page');
+        const rulesPage = document.getElementById('rules-page');
+        const scoreDisplay = document.getElementById('score-display');
+        const streakDisplay = document.getElementById('streak-display');
+        const livesDisplay = document.getElementById('lives-display');
+        const coinsDisplay = document.getElementById('coins-display');
+        const flagOneImg = document.getElementById('flag-one');
+        const flagTwoImg = document.getElementById('flag-two');
+        const flagNameOne = document.getElementById('flag-name-one');
+        const flagNameTwo = document.getElementById('flag-name-two');
+        const statOne = document.getElementById('stat-one');
+        const statTwoLabel = document.getElementById('stat-two-label');
+        const higherBtn = document.getElementById('higher-btn');
+        const lowerBtn = document.getElementById('lower-btn');
+        const messageDisplay = document.getElementById('message');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const shopBtn = document.getElementById('shop-btn');
+        const shopModal = document.getElementById('shop-modal');
+        const closeShopBtn = document.getElementById('close-shop-btn');
+        const modalCoinsDisplay = document.getElementById('modal-coins-display');
+        const passBtn = document.getElementById('pass-btn');
+        const swapBtn = document.getElementById('swap-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const lifeBtn = document.getElementById('life-btn');
+        const shopMessage = document.getElementById('shop-message');
+        const passCount = document.getElementById('pass-count');
+        const swapCount = document.getElementById('swap-count');
+        const hintCount = document.getElementById('hint-count');
+        const lifeCount = document.getElementById('life-count');
+        const playBtn = document.getElementById('play-btn');
+        const factsBtn = document.getElementById('facts-btn');
+        const rulesBtn = document.getElementById('rules-btn');
+        const backFromGameBtn = document.getElementById('back-to-home-from-game-btn');
+        const backFromFactsBtn = document.getElementById('back-from-facts-btn');
+        const backFromRulesBtn = document.getElementById('back-from-rules-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const factsTableBody = document.querySelector('#facts-table tbody');
+        const factsTableHeaders = document.querySelectorAll('#facts-table th');
+
+        const showPage = (pageId) => {
+            const pages = [homePage, gameSelectPage, gamePage, factsPage, rulesPage];
+            pages.forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.remove('hidden');
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
+        };
+
+        const saveGame = () => {
+            localStorage.setItem(savedDataKey, JSON.stringify(persistentData));
+        };
+
+        const loadGame = () => {
+            try {
+                const savedData = localStorage.getItem(savedDataKey);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    persistentData.coins = data.coins || 0;
+                    persistentData.lives = data.lives || 3;
+                    persistentData.lifelines.pass = data.lifelines.pass || 0;
+                    persistentData.lifelines.swap = data.lifelines.swap || 0;
+                    persistentData.lifelines.hint = data.lifelines.hint || 0;
+                }
+            } catch (e) {
+                console.error("Failed to load game data from localStorage", e);
+            }
+        };
+
+        const updateUI = () => {
+            livesDisplay.textContent = `Lives: ${persistentData.lives}`;
+            coinsDisplay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" /></svg>${persistentData.coins}`;
+            passCount.textContent = `(${persistentData.lifelines.pass}/10)`;
+            swapCount.textContent = `(${persistentData.lifelines.swap}/10)`;
+            hintCount.textContent = `(${persistentData.lifelines.hint}/10)`;
+            lifeCount.textContent = `(${Math.min(persistentData.lives, 10) - 3}/10)`;
+            modalCoinsDisplay.textContent = persistentData.coins;
+        };
+        
+        const formatNumber = (num, mode) => {
+            if (num === 0) return 'Unknown'; // Handle cases like Vatican City's size
+            const formatter = new Intl.NumberFormat('en-US', {
+                notation: 'compact',
+                compactDisplay: 'short'
+            });
+            let suffix = '';
+            switch(mode) {
+                case 'population':
+                    suffix = '';
+                    break;
+                case 'size':
+                    suffix = ' km²';
+                    break;
+                case 'gdp':
+                    suffix = ' USD';
+                    break;
+            }
+            return formatter.format(num) + suffix;
+        };
+
+        const getRandomCountry = () => {
+            return countriesForGame[Math.floor(Math.random() * countriesForGame.length)];
+        };
+
+        const newRound = () => {
+            if (gameOver) return;
+
+            countryOne = countryTwo || getRandomCountry();
+            countryTwo = getRandomCountry();
+            while (countryTwo.name === countryOne.name) {
+                countryTwo = getRandomCountry();
+            }
+
+            // Update UI for card one
+            flagOneImg.src = countryOne.flag;
+            flagOneImg.alt = `${countryOne.name} flag`;
+            flagNameOne.textContent = countryOne.name;
+            statOne.textContent = `${gameMode.charAt(0).toUpperCase() + gameMode.slice(1)}: ${formatNumber(countryOne[gameMode], gameMode)}`;
+            document.getElementById('card-one').classList.add('fade-in');
+
+            // Update UI for card two
+            flagTwoImg.src = countryTwo.flag;
+            flagTwoImg.alt = `${countryTwo.name} flag`;
+            flagNameTwo.textContent = countryTwo.name;
+            statTwoLabel.textContent = `Higher or Lower?`;
+            document.getElementById('card-two').classList.add('fade-in');
+
+            streakDisplay.textContent = `Streak: ${streak}`;
+            messageDisplay.textContent = '';
+            messageDisplay.className = 'result-message';
+        };
+
+        const checkGuess = (guess) => {
+            if (gameOver) return;
+            
+            const isHigher = countryTwo[gameMode] > countryOne[gameMode];
+            const isCorrect = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
+
+            if (isCorrect) {
+                score++;
+                persistentData.coins++;
+                streak++;
+                let bonusMessage = '';
+                if (streak >= 5 && streak % 5 === 0) {
+                    persistentData.coins += 10;
+                    bonusMessage += ` (+10 coins for a streak of ${streak}!)`;
+                } else if (streak >= 3 && streak % 3 === 0) {
+                    persistentData.coins += 5;
+                    bonusMessage += ` (+5 coins for a streak of ${streak}!)`;
+                }
+                messageDisplay.textContent = `Correct! ${countryTwo.name} has a ${gameMode} of ${formatNumber(countryTwo[gameMode], gameMode)}.${bonusMessage}`;
+                messageDisplay.classList.add('correct');
+            } else {
+                persistentData.lives--;
+                streak = 0;
+                messageDisplay.textContent = `Wrong! ${countryTwo.name} has a ${gameMode} of ${formatNumber(countryTwo[gameMode], gameMode)}.`;
+                messageDisplay.classList.add('incorrect');
+                document.getElementById('card-two').classList.add('shake');
+            }
+            saveGame();
+            updateUI();
+            scoreDisplay.textContent = `Score: ${score}`;
+            streakDisplay.textContent = `Streak: ${streak}`;
+
+            if (persistentData.lives <= 0) {
+                endGame();
+            } else {
+                setTimeout(() => {
+                    document.getElementById('card-one').classList.remove('fade-in');
+                    document.getElementById('card-two').classList.remove('fade-in', 'shake');
+                    newRound();
+                }, 2000);
+            }
+        };
+
+        const endGame = () => {
+            gameOver = true;
+            document.getElementById('cards-container').classList.add('hidden');
+            document.getElementById('buttons-container').classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = `Final Score: ${score}`;
+        };
+
+        const startGame = (mode, level) => {
+            gameMode = mode;
+            difficulty = level;
+            score = 0;
+            streak = 0;
+            gameOver = false;
+            loadGame(); // Reload persistent data
+
+            // Filter countries based on difficulty
+            if (difficulty === 'easy') {
+                countriesForGame = countries.filter(c => c[gameMode] > 100000000);
+            } else if (difficulty === 'medium') {
+                countriesForGame = countries.filter(c => c[gameMode] > 1000000 && c[gameMode] < 100000000);
+            } else if (difficulty === 'hard') {
+                countriesForGame = countries.filter(c => c[gameMode] < 1000000);
+            } else { // random
+                countriesForGame = countries;
+            }
+
+            if (countriesForGame.length < 2) {
+                alert('Not enough countries for this difficulty level. Please choose another.');
+                showPage('game-select-page');
+                return;
+            }
+
+            updateUI();
+            showPage('game-page');
+            document.getElementById('cards-container').classList.remove('hidden');
+            document.getElementById('buttons-container').classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            newRound();
+        };
+
+        // Shop Functions
+        const openShop = () => {
+            shopModal.classList.remove('hidden');
+            modalCoinsDisplay.textContent = persistentData.coins;
+            shopMessage.textContent = '';
+        };
+
+        const closeShop = () => {
+            shopModal.classList.add('hidden');
+        };
+
+        const purchaseItem = (cost, itemType) => {
+            if (persistentData.coins >= cost) {
+                if (itemType === 'life' && persistentData.lives >= 10) {
+                    shopMessage.textContent = "You can't have more than 10 lives!";
+                    return;
+                }
+                if (itemType !== 'life' && persistentData.lifelines[itemType] >= 10) {
+                    shopMessage.textContent = "You can't have more than 10 of this lifeline!";
+                    return;
+                }
+
+                persistentData.coins -= cost;
+                
+                if (itemType === 'life') {
+                    persistentData.lives++;
+                } else {
+                    persistentData.lifelines[itemType]++;
+                }
+                
+                saveGame();
+                updateUI();
+                closeShop();
+            } else {
+                shopMessage.textContent = "Not enough coins!";
+            }
+        };
+
+        const useLifeline = (itemType) => {
+            if (persistentData.lifelines[itemType] > 0) {
+                persistentData.lifelines[itemType]--;
+                saveGame();
+                updateUI();
+                messageDisplay.classList.remove('incorrect', 'correct');
+                
+                if (itemType === 'pass') {
+                    const nextCountry = getRandomCountry();
+                    while (nextCountry.name === countryOne.name || nextCountry.name === countryTwo.name) {
+                        nextCountry = getRandomCountry();
+                    }
+                    countryTwo = nextCountry;
+                    flagTwoImg.src = countryTwo.flag;
+                    flagTwoImg.alt = `${countryTwo.name} flag`;
+                    flagNameTwo.textContent = countryTwo.name;
+                    messageDisplay.textContent = "Second country has been switched!";
+                } else if (itemType === 'swap') {
+                    newRound();
+                    messageDisplay.textContent = "Both countries have been swapped!";
+                } else if (itemType === 'hint') {
+                    const popOne = countryOne[gameMode];
+                    const popTwo = countryTwo[gameMode];
+                    const hintMessage = popTwo > popOne ? `${countryTwo.name} is higher.` : `${countryTwo.name} is lower.`;
+                    messageDisplay.textContent = hintMessage;
+                }
+            } else {
+                messageDisplay.textContent = `You don't have a '${itemType}' lifeline!`;
+            }
+        };
+        
+        // Facts table functions
+        const renderFactsTable = (sortBy = 'population') => {
+            let sortedCountries = [...countries];
+            sortedCountries.sort((a, b) => b[sortBy] - a[sortBy]);
+            
+            factsTableBody.innerHTML = '';
+            sortedCountries.forEach(country => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="flex items-center gap-2"><img src="${country.flag}" alt="${country.name} flag">${country.name}</td>
+                    <td>${formatNumber(country.population, 'population')}</td>
+                    <td>${formatNumber(country.size, 'size')}</td>
+                    <td>${formatNumber(country.gdp, 'gdp')}</td>
+                `;
+                factsTableBody.appendChild(row);
+            });
+
+            // Update sort arrows
+            factsTableHeaders.forEach(th => {
+                const arrow = th.querySelector('.sort-arrow');
+                arrow.textContent = '';
+                if (th.id === `sort-${sortBy}`) {
+                    arrow.textContent = '▲';
+                }
+            });
+        };
+
+        // Event listeners
+        playBtn.addEventListener('click', () => showPage('game-select-page'));
+        factsBtn.addEventListener('click', () => { showPage('facts-page'); renderFactsTable(); });
+        rulesBtn.addEventListener('click', () => showPage('rules-page'));
+        backFromGameBtn.addEventListener('click', () => showPage('home-page'));
+        backFromFactsBtn.addEventListener('click', () => showPage('home-page'));
+        backFromRulesBtn.addEventListener('click', () => showPage('home-page'));
+        
+        document.querySelectorAll('.game-mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.game-mode-btn').forEach(b => b.classList.remove('bg-yellow-500'));
+                e.target.classList.add('bg-yellow-500');
+                gameMode = e.target.dataset.mode;
+                checkReadyToStart();
+            });
+        });
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('bg-yellow-500'));
+                e.target.classList.add('bg-yellow-500');
+                difficulty = e.target.dataset.difficulty;
+                checkReadyToStart();
+            });
+        });
+
+        const checkReadyToStart = () => {
+            const selectedMode = document.querySelector('.game-mode-btn.bg-yellow-500');
+            const selectedDifficulty = document.querySelector('.difficulty-btn.bg-yellow-500');
+            if (selectedMode && selectedDifficulty) {
+                startGame(selectedMode.dataset.mode, selectedDifficulty.dataset.difficulty);
+            }
+        };
+
+        higherBtn.addEventListener('click', () => checkGuess('higher'));
+        lowerBtn.addEventListener('click', () => checkGuess('lower'));
+        restartBtn.addEventListener('click', () => showPage('home-page'));
+        shopBtn.addEventListener('click', openShop);
+        closeShopBtn.addEventListener('click', closeShop);
+        
+        passBtn.addEventListener('click', () => useLifeline('pass'));
+        swapBtn.addEventListener('click', () => useLifeline('swap'));
+        hintBtn.addEventListener('click', () => useLifeline('hint'));
+        lifeBtn.addEventListener('click', () => purchaseItem(50, 'life'));
+        
+        factsTableHeaders.forEach(th => {
+            th.addEventListener('click', () => {
+                const sortBy = th.id.replace('sort-', '');
+                renderFactsTable(sortBy);
+            });
+        });
+
+        window.onload = () => {
+            loadGame();
+            updateUI();
+            showPage('home-page');
+        };
+    </script>
+</body>
+</html>
